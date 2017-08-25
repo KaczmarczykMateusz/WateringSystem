@@ -1,28 +1,18 @@
-/*
- * keyboard.c
+/*	keyboard.c
  *
- *  Created on: 23 Aug 2017
- *      Author: Mateusz
+ *      Author: Mateusz Kaczmarczyk
  */
+
 #include "keyboard.h"
 
 
-
-/*
 void keyboardInit(void) {
-//text below to header file:
-
-//End of header file
-
-	TBUTTON setBtn;
-	setBtn.KPIN = &PIN_SET_BTN;
-	setBtn.key_mask = SET_BTN;
-
-	TBUTTON selectBtn;
-	selectBtn.KPIN = &PIN_SET_BTN;
-	selectBtn.key_mask = SET_BTN;
+    INIT_SELECT_BTN_DDR;
+    INIT_SELECT_BTN_PORT;
+    INIT_SET_BTN_DDR;
+    INIT_SET_BTN_PORT;
 }
-*/
+
 void key_press( TBUTTON * btn, void (*action1)(void), void (*action2)(void) ) {
  	register uint8_t key_press = (*btn->KPIN & btn->key_mask);
 
@@ -45,6 +35,3 @@ void key_push_up( TBUTTON * btn, void (*action1)(void), void (*action2)(void) ) 
 		}
 	}
 }
-
-
-

@@ -16,5 +16,10 @@ System uses:
 to determine when to start water pump. All of the factors can be used combined or rether one by one, 
 it is not decided yet.
 
+IDE - WinAVR.
+Hardware:
+atmega8,
+atmega32.
+
 25.08.2017 - frame of the project already exists, repository is created in order to develop the project, first by adding 
 semi-ready code, then developing it as whole.

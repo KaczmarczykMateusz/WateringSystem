@@ -1,7 +1,8 @@
-/*
- * keyboard.h
- * *
+/*	keyboard.h
+ *
  *      Author: Mateusz Kaczmarczyk
+ *      Microcontroller : Atmel AVR Atmega8
+ *      16MHz external crystal resonator
  */
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
@@ -16,7 +17,7 @@
 #define SET_BTN 	(1<<PB0)
 
 #define PIN_SELECT_BTN	PINB
-#define SELECT_BTN (1<<PB1)
+#define SELECT_BTN 		(1<<PB1)
 
 void keyboardInit(void);
 
@@ -29,8 +30,5 @@ typedef struct {
  uint8_t PushupKeyLock;
  uint8_t flag;
 } TBUTTON;
-
-
-
 
 #endif
