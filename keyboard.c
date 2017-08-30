@@ -11,6 +11,14 @@ void keyboardInit(void) {
     INIT_SELECT_BTN_PORT;
     INIT_SET_BTN_DDR;
     INIT_SET_BTN_PORT;
+
+	TBUTTON setBtn;
+	setBtn.KPIN = &PIN_SET_BTN;
+	setBtn.key_mask = SET_BTN;
+
+	TBUTTON selectBtn;
+	selectBtn.KPIN = &PIN_SELECT_BTN;
+	selectBtn.key_mask = SELECT_BTN;
 }
 
 void key_press( TBUTTON * btn, void (*action1)(void), void (*action2)(void) ) {
