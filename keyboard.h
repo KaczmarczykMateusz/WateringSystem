@@ -21,14 +21,6 @@
 
 void keyboardInit(void);
 
-typedef struct {
- volatile uint8_t *KPIN;
- uint8_t key_mask;
- void (*kfun1)(void);
- void (*kfun2)(void);
- uint8_t PressKeyLock;
- uint8_t PushupKeyLock;
- uint8_t flag;
-} TBUTTON;
+
 
 #endif

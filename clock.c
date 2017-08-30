@@ -28,23 +28,43 @@ void timeDivision(void) {
 	}
 }
 
-void localTimeDivision(uint8_t day, uint8_t hour, uint8_t minute) {
-	if(DDRC == ~(1<<0x02)) {
-		timeChanged = 1;
-		minute++;
+void setTimeF(volatile uint8_t * pin, uint8_t val) {
+	if (!(*pin & val)) {
 		second = 0;
+		++minute;
 		localTimeDivision(day, hour, minute);
 		_delay_ms(150); // if key pressed longer it will increase speed
-		if (!(PINB & 0x01)) {
-		minute += minute+3;
+		if (!(*pin & val)) {
+			minute += minute+3;
 		}
+	}
+
+
+}
+
+
+void localTimeDivision(uint8_t day, uint8_t hour, uint8_t minute) {
+	second = 0;
+	if (minute>59) {
+			hour++;
+			minute=0;
+	}
+	if(hour>23) {
+				hour = 0;
+				day++;
 	}
 }
 
 uint32_t timeToSeconds(uint8_t hour, uint8_t minute, uint8_t second){
-	return ((hour * 60) + minute)*60;
-}
+	return ((hour * 60) + minute)*60; //TODO: casting
 
+}
+typedef struct _setTime{
+uint8_t second;
+uint8_t minute;
+uint8_t hour;
+uint8_t day;
+} setTime;
 
 void userTimer(int *turnOnTime, int *turnOffTime, void (*action1)(void), void (*action2)(void) ) {
 	if(minute == *turnOnTime) {

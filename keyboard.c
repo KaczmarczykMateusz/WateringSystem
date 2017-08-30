@@ -4,24 +4,26 @@
  */
 
 #include "keyboard.h"
+#include <avr/io.h>
 
+typedef struct _TBUTTON{
+ volatile uint8_t *KPIN;
+ uint8_t key_mask;
+ void (*kfun1)(void);
+ void (*kfun2)(void);
+ uint8_t PressKeyLock;
+ uint8_t PushupKeyLock;
+ uint8_t flag;
+} tButton;
 
 void keyboardInit(void) {
     INIT_SELECT_BTN_DDR;
     INIT_SELECT_BTN_PORT;
     INIT_SET_BTN_DDR;
     INIT_SET_BTN_PORT;
-
-	TBUTTON setBtn;
-	setBtn.KPIN = &PIN_SET_BTN;
-	setBtn.key_mask = SET_BTN;
-
-	TBUTTON selectBtn;
-	selectBtn.KPIN = &PIN_SELECT_BTN;
-	selectBtn.key_mask = SELECT_BTN;
 }
 
-void key_press( TBUTTON * btn, void (*action1)(void), void (*action2)(void) ) {
+void key_press( tButton * btn, void (*action1)(void), void (*action2)(void) ) {
  	register uint8_t key_press = (*btn->KPIN & btn->key_mask);
 
  	if( !btn->PressKeyLock && !key_press ) {
@@ -32,7 +34,7 @@ void key_press( TBUTTON * btn, void (*action1)(void), void (*action2)(void) ) {
 	} else if( btn->PressKeyLock && key_press ) (++btn->PressKeyLock);
  }
 
-void key_push_up( TBUTTON * btn, void (*action1)(void), void (*action2)(void) ) {
+void key_push_up( tButton * btn, void (*action1)(void), void (*action2)(void) ) {
 	register uint8_t key_press = (*btn->KPIN & btn->key_mask);
 
  	if( !btn->PushupKeyLock && !key_press ) btn->PushupKeyLock = 1;
@@ -43,3 +45,4 @@ void key_push_up( TBUTTON * btn, void (*action1)(void), void (*action2)(void) ) 
 		}
 	}
 }
+
