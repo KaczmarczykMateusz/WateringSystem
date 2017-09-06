@@ -72,7 +72,7 @@ void LCD_Home(void) {
 }
 
 //  display initialization
-void LCD_Ini(void) {
+void LCD_Initalize(void) {
 	unsigned char i;
 	LCD_DB4_DIR |= LCD_DB4; // Configuration of pinout
 	LCD_DB5_DIR |= LCD_DB5; 

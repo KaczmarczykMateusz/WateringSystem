@@ -13,11 +13,11 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#define SET_ONEWIRE_PORT     PORTB  |=  _BV(2)
-#define CLR_ONEWIRE_PORT     PORTB  &= ~_BV(2)
-#define IS_SET_ONEWIRE_PIN   PINB   &   _BV(2)
-#define SET_OUT_ONEWIRE_DDR  DDRB   |=  _BV(2)
-#define SET_IN_ONEWIRE_DDR   DDRB   &= ~_BV(2)
+#define SET_ONEWIRE_PORT     PORTC |=  _BV(5)
+#define CLR_ONEWIRE_PORT     PORTC  &= ~_BV(5)
+#define IS_SET_ONEWIRE_PIN   PINC   &   _BV(5)
+#define SET_OUT_ONEWIRE_DDR  DDRC   |=  _BV(5)
+#define SET_IN_ONEWIRE_DDR   DDRC   &= ~_BV(5)
 
 unsigned char ds18b20_ConvertT(void);
 int ds18b20_Read(unsigned char []);

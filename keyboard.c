@@ -6,21 +6,29 @@
 #include "keyboard.h"
 #include <avr/io.h>
 
-typedef struct _TBUTTON{
- volatile uint8_t *KPIN;
- uint8_t key_mask;
- void (*kfun1)(void);
- void (*kfun2)(void);
- uint8_t PressKeyLock;
- uint8_t PushupKeyLock;
- uint8_t flag;
-} tButton;
-
 void keyboardInit(void) {
     INIT_SELECT_BTN_DDR;
     INIT_SELECT_BTN_PORT;
     INIT_SET_BTN_DDR;
     INIT_SET_BTN_PORT;
+}
+
+tButton setBtnInit() {
+	tButton setBtn;
+	setBtn.KPIN = &PIN_SET_BTN;
+	setBtn.key_mask = SET_BTN;
+	setBtn.PressKeyLock = 0;
+	setBtn.flag = 0;
+	return setBtn;
+}
+
+tButton selectBtnInit() {
+	tButton selectBtn;
+	selectBtn.KPIN = &PIN_SELECT_BTN;
+	selectBtn.key_mask = SELECT_BTN;
+	selectBtn.PressKeyLock = 0;
+	selectBtn.flag = 0;
+	return selectBtn;
 }
 
 void key_press( tButton * btn, void (*action1)(void), void (*action2)(void) ) {

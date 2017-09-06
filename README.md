@@ -23,3 +23,7 @@ atmega32.
 
 25.08.2017 - frame of the project already exists, repository is created in order to develop the project, first by adding 
 semi-ready code, then developing it as whole.
+
+06.09.2017
+Basic development and debug version without communication 
+-note tat constant 15 bit ADC (oversampling) is disabling interruptions for too long (debug only)

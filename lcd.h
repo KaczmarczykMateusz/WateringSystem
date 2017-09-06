@@ -3,7 +3,7 @@
  *      Author: Mateusz Kaczmarczyk
  *      LCD display HD44780, SPI/ ISP control
  *      4-bit mode without RW (Read/Write) flag
- *      Microcontroller : Atmel AVR Atmega8
+ *      Microcontroller : Atmel AVR Atmega
  *      16MHz external crystal resonator
  */
 
@@ -15,29 +15,29 @@
 
 
 // PORT configuration
-#define LCD_RS_DIR		DDRD
-#define LCD_RS_PORT 	PORTD
-#define LCD_RS			(1 << PD0)
+#define LCD_RS_DIR		DDRB
+#define LCD_RS_PORT 	PORTB
+#define LCD_RS			(1 << PB0)
 
-#define LCD_E_DIR		DDRD
-#define LCD_E_PORT		PORTD
-#define LCD_E			(1 << PD1)
+#define LCD_E_DIR		DDRB
+#define LCD_E_PORT		PORTB
+#define LCD_E			(1 << PB1)
 
-#define LCD_DB4_DIR		DDRD
-#define LCD_DB4_PORT	PORTD
-#define LCD_DB4			(1 << PD7)
+#define LCD_DB4_DIR		DDRA
+#define LCD_DB4_PORT	PORTA
+#define LCD_DB4			(1 << PA1)
 
-#define LCD_DB5_DIR		DDRD
-#define LCD_DB5_PORT	PORTD
-#define LCD_DB5			(1 << PD4)
+#define LCD_DB5_DIR		DDRB
+#define LCD_DB5_PORT	PORTB
+#define LCD_DB5			(1 << PB2)
 
-#define LCD_DB6_DIR		DDRD
-#define LCD_DB6_PORT	PORTD
-#define LCD_DB6			(1 << PD5)
+#define LCD_DB6_DIR		DDRB
+#define LCD_DB6_PORT	PORTB
+#define LCD_DB6			(1 << PB3)
 
-#define LCD_DB7_DIR		DDRD
-#define LCD_DB7_PORT	PORTD
-#define LCD_DB7			(1 << PD6)
+#define LCD_DB7_DIR		DDRA
+#define LCD_DB7_PORT	PORTA
+#define LCD_DB7			(1 << PA0)
 
 
 //  Command definitions HD44780

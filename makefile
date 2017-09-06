@@ -41,7 +41,7 @@
 
 
 # MCU name
-MCU = atmega8
+MCU = atmega32
 
 
 # Processor frequency.
@@ -83,9 +83,12 @@ OBJDIR = .
 SRC = $(TARGET).c \
 keyboard.c \
 clock.c \
+lcd.c \
 ds18b20.c \
 WaterFlowSensor.c \
-lcd.c
+moistureSensor.c \
+requestValidation.c \
+adc.c
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = 
