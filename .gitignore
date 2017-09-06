@@ -1,2 +1,7 @@
 lcd.lst
 lcd.o
+main.elf
+main.elf
+main.hex
+*.elf
+*.hex
