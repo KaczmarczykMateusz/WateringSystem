@@ -29,9 +29,11 @@ int main(void)
 	selectBtn = selectBtnInit();
 
 	time global;
-	time user;
+//	time user;
 
-	float aa;
+	double aa;
+	double bb;
+
 	while (1) {
 
 		setTime(&setBtn, &global);
@@ -47,9 +49,8 @@ int main(void)
 			getCurrentTime(&global);
 			if(saveTime != getCurrentTime());
 */
-        	aa = adcOversampling();
-//        	aa *= 0.000078125;
-//        	aa -= ADC_CALIBRATE;
+        	bb = (double)moistureSensor();
+        	aa = (double)efficientAdcVolt();
         	global.second = second;
         	timeDivision(&global);
 /*          wf=0;
@@ -58,7 +59,7 @@ int main(void)
             if(wf>0);
 				RELAY_ON;
 */
-			sprintf(printLCDBuffer,"%02d:%02d:%02d %1.3f",global.hour, global.minute, global.second, aa);
+			sprintf(printLCDBuffer,"%02d:%02d:%02d %1.5f",global.hour, global.minute, global.second, aa);
 			LCD_Clear();
             LCD_GoTo(0,0);					
 			LCD_WriteText(printLCDBuffer);

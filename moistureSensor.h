@@ -8,17 +8,15 @@
  */
 #ifndef MOISTURE_SENSOR_H
 #define MOISTURE_SENSOR_H
+#define MAX_MOIST 0
 
 #include <stdio.h>
 #include "adc.h"
 
-void moistureSensorInit(void);
-void moistureSensor(uint16_t currentMoist);
+uint32_t moistureSensorInit(void);
+float moistureSensor(void);
 
-uint16_t relativeMoist;
-uint16_t fullMoist;
-uint8_t zeroMoist;
-uint8_t currentMoisture;
+uint16_t zeroMoist;
 uint8_t moisture(void * (void));
 
 uint8_t presetWaterVolume;

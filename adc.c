@@ -34,12 +34,36 @@ uint16_t adcConvert(void)
 	return ADC;
 }
 
-uint16_t adcOversampling(void) {
+uint16_t adcOversampleAccurate(void) {
 	uint32_t adcSum = 0;
-	for(int i=0; i<1024; i++) {
+	for(int i=0; i<1024; i++) { // pattern 4*n (n -how much we enlarge our 10 bit adc)
 		adcSum = adcSum + adcConvert();
 	}
-	adcSum = adcSum >> 5; // decimation
+	adcSum = adcSum >> 5; // decimation - shift right n times
 
 	return (uint16_t)adcSum;
+}
+
+uint16_t adcOversampleEfficient(void) {
+	uint32_t adcSum = 0;
+	for(int i=0; i<64; i++) {
+		adcSum = adcSum + adcConvert();
+	}
+	adcSum = adcSum >> 3; // decimation
+
+	return (uint16_t)adcSum;
+}
+
+float efficientAdcVolt(void) {
+	float voltageAdc = adcOversampleEfficient();
+	voltageAdc *= ADC_13_BIT_DIVISION;
+	voltageAdc += ADC_CALIBRATE;
+	return voltageAdc;
+}
+
+float accurateAdcVolt(void) {
+	float voltageAdc = adcOversampleAccurate();
+	voltageAdc *= ADC_15_BIT_DIVISION;
+	voltageAdc += ADC_CALIBRATE;
+	return voltageAdc;
 }

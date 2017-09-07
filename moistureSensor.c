@@ -8,23 +8,26 @@
  */
 #include "moistureSensor.h"
 
-void moistureSensorInit(void) {
-	fullMoist = 0;
-	zeroMoist = maxAdc / (maxAdc*maxAdc);
-	relativeMoist = fullMoist - zeroMoist;
+uint32_t moistureSensorInit(void) {
+	uint32_t relativeMoist;
+	relativeMoist = 8192L / (8192L*8192L);
 	relativeMoist /= 100;
+	return (uint32_t)relativeMoist;
 }
 
-void moistureSensor(uint16_t currentMoist) {
+float moistureSensor(void) {
+	uint32_t  releMoist = moistureSensorInit();
+	float currentMoist = (float)adcOversampleEfficient();
 	currentMoist /= (currentMoist*currentMoist);
-
-	if(currentMoist > fullMoist) {
+/*
+	if(currentMoist > MAX_MOIST) {
 		currentMoist = 100;
 	} else if(currentMoist < zeroMoist) {
 		currentMoist = 0;
-	} else {
-		currentMoist /= relativeMoist;
-	}
+	} else {*/
+		currentMoist /= releMoist;
+//	}
+	return currentMoist;
 }
 
 uint8_t moisture(void * moisture(void)) {
