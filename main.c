@@ -48,7 +48,7 @@ int main(void)
 			if(saveTime != getCurrentTime());
 */
 //        	temporary = (double)measureMoisture();
-        	temporary = (double)efficientAdcVolt();
+        	temporary = (double)lightAsPercent();
         	global.second = second;
         	timeDivision(&global);
 /*          wf=0;

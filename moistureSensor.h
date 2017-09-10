@@ -3,7 +3,8 @@
  Name        : moistureSensor.h
  Author      : Mateusz Kaczmarczyk
  Version     :
- Description :
+ Description : Higher sensor value means dryer soil
+ 	 	 	 although result is presented with "correct" percentage
  ============================================================================
  */
 #ifndef MOISTURE_SENSOR_H

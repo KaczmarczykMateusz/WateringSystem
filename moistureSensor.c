@@ -3,7 +3,7 @@
  Name        : moistureSensor.c
  Author      : Mateusz Kaczmarczyk
  Version     :
- Description :
+ Description : TODO: replace floating points with integers
  ============================================================================
  */
 #include "moistureSensor.h"

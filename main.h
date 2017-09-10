@@ -29,6 +29,7 @@
 #include "requestValidation.h"
 #include "waterflowSensor.h"
 #include "adc.h"
+#include "analogLightSensor.h"
 
 double wf;
 char printLCDBuffer[50];
