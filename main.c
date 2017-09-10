@@ -7,7 +7,7 @@
  ============================================================================
  */
 #include "main.h"
-
+#include "math.h"
 
 int main(void)
 {
@@ -21,7 +21,7 @@ int main(void)
     keyboardInit();
 	rt_clock_init();
 	LCD_Initalize();
-	adcInit();
+	adcInitAvcc();
 
     tButton setBtn;
     tButton selectBtn;
@@ -31,9 +31,7 @@ int main(void)
 	time global;
 //	time user;
 
-	double aa;
-	double bb;
-
+	double temporary;
 	while (1) {
 
 		setTime(&setBtn, &global);
@@ -49,8 +47,8 @@ int main(void)
 			getCurrentTime(&global);
 			if(saveTime != getCurrentTime());
 */
-        	bb = (double)moistureSensor();
-        	aa = (double)efficientAdcVolt();
+//        	temporary = (double)measureMoisture();
+        	temporary = (double)efficientAdcVolt();
         	global.second = second;
         	timeDivision(&global);
 /*          wf=0;
@@ -59,11 +57,12 @@ int main(void)
             if(wf>0);
 				RELAY_ON;
 */
-			sprintf(printLCDBuffer,"%02d:%02d:%02d %1.5f",global.hour, global.minute, global.second, aa);
+			sprintf(printLCDBuffer,"%02d:%02d:%02d %1.5f",global.hour, global.minute, global.second, (double)temporary);
 			LCD_Clear();
             LCD_GoTo(0,0);					
 			LCD_WriteText(printLCDBuffer);
 			timeChanged = 0;
+
 
         }
   //      goToSleep();
