@@ -88,8 +88,8 @@ ds18b20.c \
 WaterFlowSensor.c \
 moistureSensor.c \
 requestValidation.c \
-adc.c
-
+adc.c \
+analogLightSensor.c
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = 
 
