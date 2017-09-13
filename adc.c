@@ -7,39 +7,29 @@
  ============================================================================
  */
 #include "adc.h"
+// implement initialisation in main
 
-void adcInitAvcc(void) {
-	ADCSRA =   (1<<ADEN) //ADC Enable
+void adcInit(void) {
 
-	//ADPS2:0: set prescaler 128
-	|(1<<ADPS0)
-	|(1<<ADPS1)
-	|(1<<ADPS2);
-
-	ADMUX  =   (1<<REFS0) //REFS1:0: Reference Selection Bits
-		 //Internal 2.56V Voltage Reference with external capacitor at AREF pin
-	| (1<<MUX0) | (1<<MUX1) | (1<<MUX2); //Input Channel Selections (ADC7 - Pin 7 )
-
-	DDRC &=~ (1<<ADCIN); //Set PIN ADC as input (for some case) otherwise it may be omitted
-}
-
-void adcInitHalfAvcc(void) {
-	ADCSRA =   (1<<ADEN) //ADC Enable
+	ADCSRA |= (1<<ADEN) //ADC Enable
 
 	//ADPS2:0: set prescaler 128
 	|(1<<ADPS0)
 	|(1<<ADPS1)
 	|(1<<ADPS2);
 
-	ADMUX  =   (1<<REFS0) | (1<<REFS1)//REFS1:0: Reference Selection Bits)
-		 //Internal 2.56V Voltage Reference with external capacitor at AREF pin
+//	ADMUX  =  (1<<REFS1) | (1<<REFS0) //Internal 2.56V Voltage Reference with external capacitor at AREF pin
+	ADMUX  =  (1<<REFS0) //Internal 5V Voltage Reference with external capacitor at AREF pin
 	| (1<<MUX0) | (1<<MUX1) | (1<<MUX2); //Input Channel Selections (ADC7 - Pin 7 )
 
-	DDRC &=~ (1<<ADCIN); //Set PIN ADC as input (for some case) otherwise it may be omitted
+	DDRA &= ~(0x80); //Set PIN ADC as input (for some case) otherwise it may be omitted
+
 }
 
-uint16_t adcConvert(void)
+uint16_t adcConvert(uint8_t channel)
 {
+//	ADMUX |= channel;
+
 	ADCSRA |= (1<<ADSC); // single conversion
 
 	//wait until conversion finish
@@ -49,36 +39,33 @@ uint16_t adcConvert(void)
 	return ADC;
 }
 
-uint16_t adcOversampleAccurate(void) {
-	uint32_t adcSum = 0;
-	for(int i=0; i<1024; i++) { // pattern 4*n (n -how much we enlarge our 10 bit adc)
-		adcSum = adcSum + adcConvert();
+uint16_t adcOversample(uint8_t channel, uint16_t extend) { //extend - how many bits resolution to add to oversampling
+	uint16_t nyquistFreq = 4;
+	for(int i=0; i<extend; i++) {
+		nyquistFreq *= 2;
 	}
-	adcSum = adcSum >> 5; // decimation - shift right n times
+
+	uint32_t adcSum = 0;
+	for(int i=0; i<nyquistFreq; i++) {
+		adcSum = adcSum + adcConvert(channel);
+	}
+	adcSum = adcSum >> extend; // decimation
 
 	return (uint16_t)adcSum;
 }
 
-uint16_t adcOversampleEfficient(void) {
-	uint32_t adcSum = 0;
-	for(int i=0; i<64; i++) {
-		adcSum = adcSum + adcConvert();
+void voltAdc(uint16_t adc, TVOLT * voltage) {
+
+	uint16_t adcVoltage = (adc * (uint32_t)voltage->ref_v) / voltage->ref_adc;
+	voltage->adcVoltRaw = adcVoltage;
+	div_t divMod = div(adcVoltage, 100);
+	itoa(divMod.quot, voltage->beforeComa, 10);
+	itoa(divMod.rem, voltage->afterComa, 10);
+	// Make sure that digits after coma are set properly
+	if(divMod.rem < 10) {
+		voltage->afterComa[0] = '0';
+		voltage->afterComa[1] = divMod.rem+'0'; // convert to ASCII
 	}
-	adcSum = adcSum >> 3; // decimation
-
-	return (uint16_t)adcSum;
-}
-
-float efficientAdcVolt(void) {
-	float voltageAdc = (float)adcOversampleEfficient();
-	voltageAdc *= ADC_13_BIT_DIVISION;
-	voltageAdc += ADC_CALIBRATE;
-	return voltageAdc;
-}
-
-float accurateAdcVolt(void) {
-	float voltageAdc = (float)adcOversampleAccurate();
-	voltageAdc *= ADC_15_BIT_DIVISION;
-	voltageAdc += ADC_CALIBRATE;
-	return voltageAdc;
+	voltage->afterComa[2] = '0';
+	voltage->afterComa[2] = '0';
 }

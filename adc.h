@@ -3,31 +3,32 @@
  Name        : adc.h
  Author      : Mateusz Kaczmarczyk
  Version     :
- Description :
+ Description : You can increase range with voltage divider
+			Calibration with ref_adc and ref_v
  ============================================================================
  */
 #ifndef ADC_H
 #define ADC_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <avr/io.h>
 #include "keyboard.h"
 
 #define ADCIN PA7   //definition ADCIN (ADC input)
-#define ADC_CALIBRATE -0.49
 
-#define maxAdc13Bit 8192 // 15 bit adc = 2^13
-#define maxAdc15Bit 32768 // 15 bit adc = 2^15
-#define ADC_15_BIT_DIVISION 0.000078125
-#define ADC_13_BIT_DIVISION 0.0003125
+typedef struct {
+	uint16_t adc_mid;
+	uint16_t ref_adc; // set value in the middle of measure range which can be high because voltage divider
+	uint16_t ref_v; // set value (volt) of adc which set during measuring of ref_adc (multiply this value *100)
+	uint16_t adcVoltRaw;
+	char beforeComa[3];
+	char afterComa[3];
+} TVOLT;
 
-uint16_t maxAdc;
-
-void adcInitAvcc(void);
-uint16_t adcConvert(void);
-uint16_t adcOversampleAccurate(void);
-uint16_t adcOversampleEfficient(void);
-float efficientAdcVolt(void);
-float accurateAdcVolt(void);
+void adcInit(void);
+void voltAdc(uint16_t adc, TVOLT * voltage);
+uint16_t adcConvert(uint8_t channel);
+uint16_t adcOversample(uint8_t channel, uint16_t extend);
 
 #endif
