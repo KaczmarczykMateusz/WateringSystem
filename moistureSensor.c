@@ -8,6 +8,30 @@
  */
 #include "moistureSensor.h"
 
+uint8_t moistureSensor(TVOLT * voltage) {
+	moistSensMinOut = 200UL; // value in volt multiplied "* 100"
+	moistSensMaxOut = 455UL; // Maximum value which may be shown by sensor (drought) multiplied "*100" minus "-1"
+	moistResult = (int32_t)voltage->adcVoltRaw;
+	moistResult -= moistSensMinOut;
+	moistSensMaxOut -= moistSensMinOut;
+
+	tempMoist = 1000000/moistSensMaxOut;
+	moistResult = tempMoist * moistResult;
+	moistResult /= 10000;
+	moistResult *= (-1);
+	moistResult += 100;
+
+	if(moistResult <= 1) {
+		moistResult = 0;
+	} else if (moistResult > 99) {
+		moistResult = 100;
+	}
+
+	return (uint8_t)moistResult;
+}
+
+//TODO: implement code below
+/*
 //check values for calibration
 void checkMoistSensor(void) {
 	sprintf(bufferLCD, "Moist calibrate");
@@ -52,10 +76,10 @@ void calibrateMoistSensor(tButton * setBtn, tButton * selectBtn) {
 		key_press(setBtn, incrementMaxVal, NULL);
 	}
 }
-
+*/
 // Moisture sensor works only with 5V reference voltage (it needs minimum 3.7V)
 // Max moist is used to calibrate sensor, if set to zero put sensor to water and read value which you save to this variable
-float measureMoisture(void) {
+/*float measureMoisture(void) {
 	maxMoist = 70;
 
 	if(maxMoist) {
@@ -133,4 +157,4 @@ void choiceOfMenu(void) {
 	} else {
 		choseMenu = 0;
 	}
-}
+}*/

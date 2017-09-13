@@ -33,13 +33,16 @@ void moisturePrintOnLCD(void);
 void choiceOfMenu(void);
 void incrementMinVal(void);
 void incrementMaxVal(void);
+uint8_t moistureSensor(TVOLT * voltage);
 
+int32_t moistResult;
+uint16_t moistSensMinOut; // value in volt multiplied "* 100"
+uint16_t moistSensMaxOut; // Maximum value which may be shown by sensor (drought) multiplied "*100" minus "-1"
 uint8_t moistSensors[6];
 uint8_t choseMenu;
-uint8_t maxMoist;
-uint8_t minMoist;
-uint8_t moisture(void * (void));
 
+uint8_t moisture(void * (void));
+uint32_t tempMoist;
 
 // it is simultaneously value of PIN from which sensor is powered !
 typedef struct {
