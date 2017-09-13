@@ -89,7 +89,11 @@ WaterFlowSensor.c \
 moistureSensor.c \
 requestValidation.c \
 adc.c \
-analogLightSensor.c
+analogLightSensor.c \
+uart.c \
+dataParsing.c
+
+
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = 
 

@@ -30,6 +30,8 @@
 #include "waterflowSensor.h"
 #include "adc.h"
 #include "analogLightSensor.h"
+#include "uart.h"
+#include "dataParsing.h"
 
 double wf;
 char printLCDBuffer[50];

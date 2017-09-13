@@ -23,9 +23,9 @@
 #define LCD_E_PORT		PORTB
 #define LCD_E			(1 << PB1)
 
-#define LCD_DB4_DIR		DDRA
-#define LCD_DB4_PORT	PORTA
-#define LCD_DB4			(1 << PA1)
+#define LCD_DB4_DIR		DDRC
+#define LCD_DB4_PORT	PORTC
+#define LCD_DB4			(1 << PC5)
 
 #define LCD_DB5_DIR		DDRB
 #define LCD_DB5_PORT	PORTB
@@ -35,9 +35,9 @@
 #define LCD_DB6_PORT	PORTB
 #define LCD_DB6			(1 << PB3)
 
-#define LCD_DB7_DIR		DDRA
-#define LCD_DB7_PORT	PORTA
-#define LCD_DB7			(1 << PA0)
+#define LCD_DB7_DIR		DDRC
+#define LCD_DB7_PORT	PORTC
+#define LCD_DB7			(1 << PC4)
 
 
 //  Command definitions HD44780
