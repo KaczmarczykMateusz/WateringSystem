@@ -41,8 +41,6 @@ int main(void)
 	uart_flush();
 	int16_t temporar;
 
-	char *message = "egg";
-
 	while (1) {
 
 		setTime(&setBtn, &global);
@@ -76,14 +74,7 @@ int main(void)
 
         if(timeChanged == 1) {
 
-//			uint16_t received = uart_getc();
-//			uint8_t uartRxError = (received >> 8);
-//			received = received & ~(0xF0);
-
-        	//uart_puts("eggg");
-
-/*
- *         	key_push_up(&selectBtn, getCurrentTime(&user), NULL); // not working
+/*        	key_push_up(&selectBtn, getCurrentTime(&user), NULL); // not working
 			getCurrentTime(&global);
 			if(saveTime != getCurrentTime());
 */

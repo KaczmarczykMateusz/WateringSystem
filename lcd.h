@@ -1,7 +1,7 @@
 /*	lcd.c
  *
  *      Author: Mateusz Kaczmarczyk
- *      LCD display HD44780, SPI/ ISP control
+ *      LCD display HD44780,
  *      4-bit mode without RW (Read/Write) flag
  *      Microcontroller : Atmel AVR Atmega
  *      16MHz external crystal resonator
