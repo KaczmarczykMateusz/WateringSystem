@@ -17,7 +17,7 @@ int main(void)
 
 //	powerSaveInit();
     keyboardInit();
-	rt_clock_init();
+//	rt_clock_init();
 	LCD_Initalize();
 	adcInit();
 
@@ -37,8 +37,8 @@ int main(void)
 	moist.ref_v = 234;
 	moist.ref_adc = 2100;
 	uint8_t temporary;
-	uart_init( UART_BAUD_SELECT(9600, 16000000L) );
-	uart_flush();
+	uartInit( UART_BAUD_SELECT(9600, 16000000L) );
+	uartFlush();
 	int16_t temporar;
 
 	while (1) {
@@ -60,20 +60,21 @@ int main(void)
 			LCD_GoTo(0,0);
 			LCD_WriteText("Tx buffer full");
 		}
-*/
-		if(uart_peek() != UART_NO_DATA) {
-			temporar = uart_getc();
+*/		/*
+		if(uartPeek() != UART_NO_DATA) {
+			temporar = uartGetc();
 			temporar &= ~(0xFF00);
 			//temporar = (temporar >> 8); // TODO: Imlement error check
-			sprintf(printLCDBuffer,"%d", temporar);
+			sprintf(printLCDBuffer,"%c", temporar);
 			LCD_Clear();
 			LCD_GoTo(0,0);
 			LCD_WriteText(printLCDBuffer);
 			_delay_ms(500);
-		}
+		}*/
 
+		uartCheck(parse_uart_data);
         if(timeChanged == 1) {
-
+        	//uartPuts("Second passed    ");
 /*        	key_push_up(&selectBtn, getCurrentTime(&user), NULL); // not working
 			getCurrentTime(&global);
 			if(saveTime != getCurrentTime());
