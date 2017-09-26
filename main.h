@@ -37,9 +37,11 @@ double wf;
 char printLCDBuffer[50];
 double temp;
 unsigned char ds18b20_pad[9];
-char str[8];
+char str[9];
+uint8_t setTimerFlag;
 
-
+void timerSetMode(void);
+void exitTimerSetMode(void);
 void relOFF(void);
 void relON(void);
 void outOFF(void);

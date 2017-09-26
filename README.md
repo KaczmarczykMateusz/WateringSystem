@@ -27,3 +27,8 @@ semi-ready code, then developing it as whole.
 06.09.2017
 Basic development and debug version without communication 
 -note tat constant 15 bit ADC (oversampling) is disabling interruptions for too long (debug only)
+
+15.09.2017
+After implementing UART there were huge issues with reseting/ hanging up of uC, also receiving and sending random data was problem.
+Only disabling Real Time Clock was helping.
+BUT all issues are solved now by adding two 100nF capacitors between both (Rx & Tx) pins of uC and GND
