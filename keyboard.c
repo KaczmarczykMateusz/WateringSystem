@@ -1,56 +1,95 @@
-/*	keyboard.c
- *
- *      Author: Mateusz Kaczmarczyk
+/*
+ ============================================================================
+ Name        : keyboard.c
+ Author      : Mateusz Kaczmarczyk
+ Version     : Microcontroller : Atmel AVR Atmega32
+ Description : See header file
+ ============================================================================
  */
 
 #include "keyboard.h"
 #include <avr/io.h>
 
-void keyboardInit(void) {
-    INIT_SELECT_BTN_DDR;
-    INIT_SELECT_BTN_PORT;
-    INIT_SET_BTN_DDR;
-    INIT_SET_BTN_PORT;
-}
-
-tButton setBtnInit() {
+/*************************************************************************
+ Function: 	btnInit()
+ Purpose:	Initialise single button
+ Input:		Parameters of button connection; DDR, PORT, PIN adresses and key mask
+ Returns:	Returns struct with button parameters
+ **************************************************************************/
+tButton btnInit(volatile uint8_t * K_DDR, volatile uint8_t * K_PORT, volatile uint8_t *K_PIN, uint8_t keyMask) {
 	tButton setBtn;
-	setBtn.KPIN = &PIN_SET_BTN;
-	setBtn.key_mask = SET_BTN;
+//	setBtn.K_DDR &= ~keyMask;
+//	setBtn.K_PORT |= keyMask;
+	setBtn.K_DDR = K_DDR;
+	setBtn.K_PORT = K_PORT;
+	setBtn.K_PIN = K_PIN;
+	setBtn.key_mask = keyMask;
 	setBtn.PressKeyLock = 0;
-	setBtn.flag = 0;
+	*setBtn.K_DDR &= ~keyMask;
+	*setBtn.K_PORT |= keyMask;
+
 	return setBtn;
 }
 
-tButton selectBtnInit() {
-	tButton selectBtn;
-	selectBtn.KPIN = &PIN_SELECT_BTN;
-	selectBtn.key_mask = SELECT_BTN;
-	selectBtn.PressKeyLock = 0;
-	selectBtn.flag = 0;
-	return selectBtn;
-}
+/*************************************************************************
+ Function: 	key_press()
+ Purpose:	assigning action to tButton key press event
+ Input:		tButton struct and pointer to void function performing action
+ **************************************************************************/
+void keyPress(tButton * btn, void (*action)(void)) {
+ 	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
 
-void key_press( tButton * btn, void (*action1)(void), void (*action2)(void) ) {
- 	register uint8_t key_press = (*btn->KPIN & btn->key_mask);
+ 	if(!btn->PressKeyLock && !key_press) {
+		btn->PressKeyLock = 1;
+		if(action) {
+			action(); // action for PRESS of button
+		}
 
- 	if( !btn->PressKeyLock && !key_press ) {
-		btn->PressKeyLock=1;
-		if(action1) action1(); // action for PRESS of button
-		if(action2) action2();
-
-	} else if( btn->PressKeyLock && key_press ) (++btn->PressKeyLock);
+	} else if(btn->PressKeyLock && key_press) {
+		(++btn->PressKeyLock);
+	}
  }
 
-void key_push_up( tButton * btn, void (*action1)(void), void (*action2)(void) ) {
-	register uint8_t key_press = (*btn->KPIN & btn->key_mask);
+/*************************************************************************
+ Function: 	keyLongPress()
+ Purpose:	assigning action to tButton key press event
+ Input:		tButton struct, short and long press triggered action
+ **************************************************************************/
+void keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longPressAction)(void)) {
+ 	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
 
- 	if( !btn->PushupKeyLock && !key_press ) btn->PushupKeyLock = 1;
- 	else if( btn->PushupKeyLock && key_press ) {
-  		if( !++btn->PushupKeyLock ) {
-  			if(action1) action1();   //action for PUSH_UP (button release)
-			if(action2) action2();
+ 	if(!btn->PressKeyLock && !key_press) {
+		btn->PressKeyLock = 1;
+		btn->longPressLock = LONG_PRESS_LOCK_VAL;
+		if(shortPressAction) {
+			shortPressAction(); // action for PRESS of button
+		}
+	}  else if(btn->PressKeyLock && key_press) {
+		(++btn->PressKeyLock);
+	} else if(!key_press && btn->longPressLock) {
+		btn->longPressLock++;
+	} else if(!btn->longPressLock && !key_press) {
+		if(longPressAction) {
+			longPressAction(); // action for PRESS of button
+		}
+	}
+
+ }
+
+/*************************************************************************
+ Function: 	keyPushUp()
+ Purpose:	Assigning action to tButton key push up event
+ Input:		tButton struct and pointer to void function performing action
+ **************************************************************************/
+void keyPushUp(tButton * btn, void (*action)(void)) {
+	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
+
+ 	if(!btn->PushupKeyLock && !key_press) btn->PushupKeyLock = 1;
+ 	else if(btn->PushupKeyLock && key_press) {
+  		if(!++btn->PushupKeyLock) {
+  			if(action) {
+  				action();   //action for PUSH_UP (button release)
+  			}
 		}
 	}
 }
-
