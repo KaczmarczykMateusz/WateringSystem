@@ -29,7 +29,7 @@ void rt_clock_init(void)
 void setTime(tButton * btn, time *tmp) {
 	static uint8_t longPress;
 	static uint8_t shortenDelay;
-	register uint8_t key_press = (*btn->KPIN & btn->key_mask);
+	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
 	if (!(key_press)) {
 		tmp->minute++;
 		second = 0;

@@ -14,8 +14,10 @@
 #define CLOCK_H
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
+#include <util/atomic.h>
+
 #include "keyboard.h"
-#define RELAY_OFF   PORTC |= (1<<PC0)
+#define ADC_DISABLE TIMSK = 0x00 //ADC Enable
 
 typedef struct {
 	volatile uint8_t second;
