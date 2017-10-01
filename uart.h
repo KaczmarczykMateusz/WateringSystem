@@ -59,6 +59,15 @@
 #define UART_BUF_OVF  		  0x0200              // receive circular buffer overflow
 #define UART_NO_DATA          0x0100              // no receive data available
 
+//  Module global variables
+static volatile uint8_t UART_TxBuf[UART_TX_BUFFER_SIZE];
+static volatile uint8_t UART_RxBuf[UART_RX_BUFFER_SIZE];
+
+static volatile uint8_t UART_TxHead;
+static volatile uint8_t UART_TxTail;
+static volatile uint8_t UART_RxHead;
+static volatile uint8_t UART_RxTail;
+static volatile uint8_t UART_LastRxError;
 
 uint8_t receiveBufor[100];
 uint8_t uartRxErr;
@@ -67,7 +76,7 @@ uint8_t uartRxErr;
 
 /**
    @brief   Initialize UART and set baudrate
-   @param   baudrate Specify baudrate using macro UART_BAUD_SELECT()
+   @param   Specify baudrate using macro UART_BAUD_SELECT()
    @return  none
 */
 extern void uartInit(uint16_t baudrate);
@@ -180,5 +189,7 @@ extern void uartFlush(void);
  * \param    Function for further parsing
  */
 void uartCheck(void (*action)(char *pBuf));
+
+void uwrite_hex(unsigned char n);
 
 #endif

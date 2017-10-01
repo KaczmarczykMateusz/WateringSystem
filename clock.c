@@ -1,9 +1,9 @@
 /*
  ============================================================================
- Name        : clock.h
+ Name        : clock.c
  Author      : Mateusz Kaczmarczyk
- Version     :
- Description :
+ Version     : Atmega32 with 32 768 kHz cristal at TOSC1 & TOSC2 (Timer2)
+ Description : See header file
  ============================================================================
  */
 #include <avr/sleep.h>
@@ -13,11 +13,24 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
-// RTC time is thru timer2 being run by a 32.768kHz xtal on pins TOSC1&2
-// note that order is important
-void rt_clock_init(void)
+ISR(TIMER2_OVF_vect)
+/*************************************************************************
+ Function: Interrupt from Timer2
+ Purpose:  Counting passed seconds and setting time change flag
+ **************************************************************************/
 {
-	_delay_ms(2000);
+	++second;
+	SEC_CHANGED_SET;
+}
+
+/*************************************************************************
+ Function: rt_clock_init()
+ Purpose:  initialize RTC Timer2 32 768 kHz clock
+ Input:    none
+ Returns:  none
+		note that order	in function is important !
+ **************************************************************************/
+void rt_clock_init(void) {
 	ASSR = _BV(AS2);						// Set timer2 to run asynchronous
 	TCCR2 = _BV(CS20) | _BV(CS22);			// Start timer2 with prescaler = 128 (TCNT2 = 255 takes 1 sec.)
 	while(ASSR & _BV(TCN2UB));				// Wait until TC2 is updated
@@ -25,14 +38,21 @@ void rt_clock_init(void)
 	sei();
 }
 
-// Setting time with push button
-void setTime(tButton * btn, time *tmp) {
+/*************************************************************************
+ Function: setTime()
+ Purpose:  Setting time with push button
+ Input:    Struct with button parameters and struct with time to be set
+ Returns:  Set if time got changed
+ **************************************************************************/
+uint8_t setTime(tButton * btn, time *tmp) {
 	static uint8_t longPress;
 	static uint8_t shortenDelay;
+	uint8_t timeModified = 0;
 	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
 	if (!(key_press)) {
 		tmp->minute++;
-		second = 0;
+		tmp->second = 0;
+		timeModified = 1;
 		if (longPress > 30) {
 			tmp->hour ++;
 		} else if (longPress > 15) {
@@ -52,70 +72,107 @@ void setTime(tButton * btn, time *tmp) {
 				longPress++;
 			}
 		}
-	timeChanged = 1;
+		SEC_CHANGED_SET;
 	} else {
 		longPress = 0;
 		shortenDelay = 0;
 	}
+	if(timeModified) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
+/*************************************************************************
+ Function: timeDivision()
+ Purpose:  Puts counted by clock seconds into DD:HH:MM:SS format
+ Input:    struct with time to be ordered
+ Returns:  none
+ **************************************************************************/
 void timeDivision(time *tmp) {
-	if (second>59) {
+	if (tmp->second>59) {
 		tmp->minute++;
 		tmp->second = 0;
-		second = 0;
+		MIN_CHANGED_SET;
 	}
 	if (tmp->minute>59) {
 		tmp->hour++;
 		tmp->minute=0;
+		if(tmp->hour>23) {
+			tmp->hour = 0;
+			tmp->day++;
+		}
 	}
-	if(tmp->hour>23) {
-		tmp->hour = 0;
-		tmp->day++;
+	if(second>59) {
+		second = 0;
 	}
 }
 
+/*************************************************************************
+ Function: timeToSeconds()
+ Purpose:  Transform time HH:MM:SS into seconds
+ Input:    Struct with time to be transformed
+ Returns:  none
+ **************************************************************************/
 uint32_t timeToSeconds(time *tmp){
-	return ((tmp->hour * 60) + tmp->minute)*60; //TODO: casting
-
+	return (uint32_t)((uint32_t)((tmp->hour * 60) + tmp->minute) * 60);
 }
 
-void userTimer(int *turnOnTime, int *turnOffTime, void (*action1)(void), void (*action2)(void), time *tmp ) {
-	if(tmp->minute == *turnOnTime) {
+/*************************************************************************
+ Function: userTimer()
+ Purpose:  lets user to set action which should be taken at indicated time
+ Input:
+ Returns:  none
+ **************************************************************************/
+void userTimer(uint32_t turnOnTime, uint32_t turnOffTime, void (*actionON)(void), void (*actionOFF)(void), uint32_t currentTime) {
+	static uint8_t checkPreset = 0;
+	if(currentTime == turnOnTime) {
 		if(checkPreset == 0) {
 			checkPreset= 1;
-			if(action1) action1();
+			if(actionON) actionON();
 		}
 	}
 
-	if(tmp->minute == *turnOffTime) {
+	if(currentTime == turnOffTime) {
 		if(checkPreset == 1) {
 			checkPreset = 0;
-			if(action2) action2();
+			if(actionOFF) actionOFF();
 		}
 	}
 }
 
+/*************************************************************************
+ Function: getCurrentTime()
+ Purpose:  Transform time from passed struct into seconds
+ Input:    Time hours, minutes and seconds into seconds
+ Returns:  Time as seconds
+ **************************************************************************/
 uint32_t getCurrentTime(time *tmp) {
-	timeToSeconds(tmp);
-	return saveTime;
+	return timeToSeconds(tmp);
 }
 
+/*************************************************************************
+ Function: powerSaveInit()
+ Purpose:  Initialise power saving/ sleep mode without entering it
+ 	 	   it enables using function goToSleep()
+ Input:    none
+ Returns:  none
+ **************************************************************************/
 void powerSaveInit(void){
 	rt_clock_init();  //initialise the timer (opitonally if not initialised before)
 	sei();
 	set_sleep_mode(SLEEP_MODE_PWR_SAVE);
 }
 
+/*************************************************************************
+ Function: goToSleep()
+ Purpose:  Enters power saving/ sleep mode, it has to be preceded by powerSaveInit()
+ Input:    none
+ Returns:  none
+ **************************************************************************/
 void goToSleep(void) {
 	sleep_enable();
 	sleep_mode();
 	sleep_disable();
-}
-
-
-ISR(TIMER2_OVF_vect)
-{
-	++second;
-	timeChanged = 1;
 }

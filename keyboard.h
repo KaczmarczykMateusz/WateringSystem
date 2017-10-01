@@ -17,6 +17,7 @@
 //	@brief Buttons masks definitions
 #define SET_BTN_MASK 	(1<<PD6)
 #define SELECT_BTN_MASK (1<<PD5)
+#define STOP_BTN_MASK 	(1<<PD4)
 
 // @brief	definitions of numbers of PINs of microcontroller for matrix keypad, just to improve readability
 #define ROW_A 	7	// @brief	connect very left PIN of keyboard (closest to '1','*') to Px7 of Atmega

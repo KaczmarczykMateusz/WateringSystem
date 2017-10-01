@@ -13,7 +13,7 @@
 #define MIN_MOIST 0
 
 // Outputs definitions
-#define MOISR_SENSORS_INIT DDRC |= 0x1F
+//#define MOISR_SENSORS_INIT DDRC |= 0x1F
 
 #include <stdio.h>
 #include <util/delay.h>

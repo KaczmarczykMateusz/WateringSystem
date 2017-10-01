@@ -19,16 +19,6 @@
 #define UART_RECEIVE_INTERRUPT   USART_RXC_vect
 #define UART_TRANSMIT_INTERRUPT  USART_UDRE_vect
 
-//  Module global variables
-static volatile uint8_t UART_TxBuf[UART_TX_BUFFER_SIZE];
-static volatile uint8_t UART_RxBuf[UART_RX_BUFFER_SIZE];
-
-static volatile uint8_t UART_TxHead; // TODO: Implement structure
-static volatile uint8_t UART_TxTail;
-static volatile uint8_t UART_RxHead;
-static volatile uint8_t UART_RxTail;
-static volatile uint8_t UART_LastRxError;
-
 ISR(UART_RECEIVE_INTERRUPT)
 /*************************************************************************
  Function: UART Receive Complete interrupt
@@ -49,14 +39,14 @@ ISR(UART_RECEIVE_INTERRUPT)
 // calculate buffer index
 	tmpHead = (UART_RxHead + 1) & UART_RX_BUFFER_MASK;
 
-	if (tmpHead == UART_RxTail) {
-// error: receive buffer overflow
-		lastRxError = UART_BUF_OVF >> 8;
-	} else {
+	if (tmpHead != UART_RxTail) {
 // store new index
 		UART_RxHead = tmpHead;
 // store received data in buffer
 		UART_RxBuf[tmpHead] = data;
+	} else {
+// error: receive buffer overflow
+		lastRxError = UART_BUF_OVF >> 8;
 	}
 	UART_LastRxError = lastRxError;
 }
@@ -77,7 +67,7 @@ ISR(UART_TRANSMIT_INTERRUPT)
 		UDR = UART_TxBuf[tmpTail]; // start transmission
 	} else {
 // Tx buffer empty, disable UDRE interrupt
-		UCSRB &= ~_BV(UDRIE);
+		UCSRB &= ~(1<<UDRIE);
 	}
 }
 
@@ -191,7 +181,7 @@ void uartPutc(uint8_t data) {
 	UART_TxHead = tmpHead;
 
 // enable UDRE interrupt
-	UCSRB |= _BV(UDRIE);
+	UCSRB |= (1<<UDRIE);
 }
 
 /*************************************************************************
@@ -274,4 +264,17 @@ void uartCheck (void (*action)(char *pBuf)) {
 			action((char*)receiveBufor);
 		}
 	}
+}
+
+//TODO: check if function is working
+void uwrite_hex(unsigned char n) {
+	if(((n>>4) & 15) < 10)
+		uartPutc('0' + ((n>>4)&15));
+	else
+		uartPutc('A' + ((n>>4)&15) - 10);
+	n <<= 4;
+	if(((n>>4) & 15) < 10)
+		uartPutc('0' + ((n>>4)&15));
+	else
+		uartPutc('A' + ((n>>4)&15) - 10);
 }
