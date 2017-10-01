@@ -91,7 +91,10 @@ requestValidation.c \
 adc.c \
 analogLightSensor.c \
 uart.c \
-dataParsing.c
+dataParsing.c \
+action.c \
+fat16.h \
+spi.h
 
 
 # List C++ source files here. (C dependencies are automatically generated.)

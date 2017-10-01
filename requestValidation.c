@@ -7,7 +7,7 @@
  ============================================================================
  */
 #include "requestValidation.h"
-/*
+
 void conditionalSwitch(uint32_t turnOnTime, uint32_t activeTime, uint32_t currentTimeAsSeconds, uint8_t moistFlag, float temp,
 		void * action1(void), void * action2(void), float waterVolume, uint8_t bright) {
 	uint8_t takeActionFlag = 0;
@@ -20,8 +20,8 @@ void conditionalSwitch(uint32_t turnOnTime, uint32_t activeTime, uint32_t curren
 	if(currentTimeAsSeconds > turnOnTime){
 		passedTime = currentTimeAsSeconds - turnOnTime;
 	} else {
-		uint32_t totalFirstDay = ((24*60)*60) - turnOnTime; // entire day - time on = time on during first day
-		uint32_t totalSecondDay = ((24*60)*60) - currentTimeAsSeconds;
+		uint32_t totalFirstDay = (uint32_t)(((uint32_t)24*60)*60) - turnOnTime; // entire day - time on = time on during first day
+		uint32_t totalSecondDay = (uint32_t)(((uint32_t)24*60)*60) - currentTimeAsSeconds;
 		passedTime = totalFirstDay + totalSecondDay;
 	}
 	if(passedTime > (onePercentActiveTime * 80)) {
@@ -48,9 +48,10 @@ void conditionalSwitch(uint32_t turnOnTime, uint32_t activeTime, uint32_t curren
 		action1();
 		actionExecuting = 1;
 		}
-	} else if(waterVolume > presetWaterVolume) {
+	}
+	/* else if(waterVolume > presetWaterVolume) {
 		action2();
 		actionExecuting = 0;
-	}
+	}*/
 }
-*/
+

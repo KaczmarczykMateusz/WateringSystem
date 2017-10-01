@@ -6,14 +6,17 @@
  Description :
  ============================================================================
  */
+#ifndef MAIN_H_
+#define MAIN_H_
+
 // Outputs definitions
 #define RELAY_INIT DDRC |= (1<<PC0)
 #define RELAY_ON    PORTC &= ~(1<<PC0)
 #define RELAY_OFF   PORTC |= (1<<PC0)
 
 #define OUTPUT_PIN_A111_INIT DDRC |= (1<<PC1)
-#define OUTPUT_PIN_A111_ON    PORTC &= ~(1<<PC1)
-#define OUTPUT_PIN_A111_OFF   PORTC |= (1<<PC1)
+#define ALARM_ON    PORTC &= ~(1<<PC1)
+#define ALARM_OFF   PORTC |= (1<<PC1)
 
 // CPU 16MHz
 #include <avr/interrupt.h>
@@ -32,17 +35,20 @@
 #include "analogLightSensor.h"
 #include "uart.h"
 #include "dataParsing.h"
+#include "action.h"
+#include "spi.h"
+#include "fat16.h"
+
+time global;
+time turnOnTime;
+time turnOffTime;
+
+TEMP temp;
 
 double wf;
 char printLCDBuffer[50];
-double temp;
-unsigned char ds18b20_pad[9];
-char str[9];
-uint8_t setTimerFlag;
+//double temp;
 
-void timerSetMode(void);
-void exitTimerSetMode(void);
-void relOFF(void);
-void relON(void);
-void outOFF(void);
-void outON(void);
+char currTemp[9];
+
+#endif

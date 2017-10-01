@@ -23,9 +23,9 @@
 #define LCD_E_PORT		PORTB
 #define LCD_E			(1 << PB1)
 
-#define LCD_DB4_DIR		DDRC
-#define LCD_DB4_PORT	PORTC
-#define LCD_DB4			(1 << PC5)
+#define LCD_DB4_DIR		DDRB
+#define LCD_DB4_PORT	PORTB
+#define LCD_DB4			(1 << PB4)
 
 #define LCD_DB5_DIR		DDRB
 #define LCD_DB5_PORT	PORTB

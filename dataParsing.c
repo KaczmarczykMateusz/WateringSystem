@@ -9,7 +9,7 @@
 #include "dataParsing.h"
 
 /*************************************************************************
-Function: parse_data()
+Function: parse_uart_data(char * pBuf)
 Purpose:  Combine bytes into string and check them for "enter" token.
 		  Parsing data, searching for tokens, taking actions
 Input:    Function for further parsing
@@ -46,5 +46,33 @@ void parse_uart_data(char * pBuf) {
 		} else {
 			uartPuts("OK\r\n");
 		}
+	}
+}
+
+/*************************************************************************
+Function: sendInteger(toChar passed)
+Purpose:  Sends integer decoded as char
+		  For use with user interface
+Input:	  Digit to send, not larger than 999
+Returns:  None
+**************************************************************************/
+void sendInteger(uint16_t passedValue) {
+	char auxChar;
+	char auxCharTemp = 'a';
+	if(passedValue <= 999) {
+		if(passedValue > 99) {
+			auxCharTemp= (passedValue % 10) + '0';
+			passedValue /= 10;
+			}
+		if(passedValue > 9) {
+			auxChar = (passedValue / 10) +'0';
+			uartPutc(auxChar);
+		}
+		auxChar = (passedValue % 10) +'0';
+		uartPutc(auxChar);
+		if(auxCharTemp != 'a') {
+				uartPutc(auxCharTemp);
+		}
+		uartPuts(" ");
 	}
 }
