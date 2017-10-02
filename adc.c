@@ -19,8 +19,7 @@ void adcInit(void) {
 	| (1<<ADPS0) | (1<<ADPS1) | (1<<ADPS2); // set prescaler 128
 
 //	ADMUX  =  (1<<REFS1) | (1<<REFS0) //Internal 2.56V Voltage Reference with external capacitor at AREF pin
-	ADMUX  =  (1<<REFS0) //Internal 5V Voltage Reference with external capacitor at AREF pin
-	| (1<<MUX0) | (1<<MUX1) | (1<<MUX2); //Input Channel Selections (ADC7 - Pin 7 )
+	ADMUX  =  (1<<REFS0); //Internal 5V Voltage Reference with external capacitor at AREF pin
 
 	DDRA &= ~(0x80); //Set PIN ADC as input (for some case) otherwise it may be omitted
 
@@ -34,7 +33,8 @@ void adcInit(void) {
  **************************************************************************/
 uint16_t _adcConvert(uint8_t channel)
 {
-//	ADMUX |= channel;
+	ADMUX &= ~0x0F;
+	ADMUX |= channel;
 
 	ADCSRA |= (1<<ADSC); // single conversion
 
