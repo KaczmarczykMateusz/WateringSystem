@@ -23,9 +23,18 @@
 #include "adc.h"
 #include "keyboard.h"
 
+#define MOIST_SENSORS_NUMBER 2
+
 char bufferLCD[16];
-char bufferLCD_2[16];
+
+uint8_t sensorNumber;
+
 float measureMoisture(void);
+void moistSensPwrDwn(volatile uint8_t *S_DDR, volatile uint8_t *S_PORT, uint8_t sensorMask);
+void moistSensPwrUp(volatile uint8_t *S_DDR, volatile uint8_t *S_PORT, uint8_t sensorMask);
+void moistCheckStart(uint8_t *flag, uint8_t *sensNo);
+void moistCheckResult(uint8_t flag, TVOLT *mSens, uint8_t *sensNo, uint8_t *result) ;
+
 void checkMoistSensor(void);
 void calibrateMoistSensor(tButton * setBtn, tButton * selectBtn);
 uint8_t writeMoisture(volatile uint8_t * KPIN);
@@ -41,7 +50,7 @@ uint16_t moistSensMaxOut; // Maximum value which may be shown by sensor (drought
 uint8_t moistSensors[6];
 uint8_t choseMenu;
 
-uint8_t moisture(void * (void));
+//uint8_t moisture(void * (void));
 uint32_t tempMoist;
 
 // it is simultaneously value of PIN from which sensor is powered !

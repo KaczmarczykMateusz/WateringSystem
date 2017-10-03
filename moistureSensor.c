@@ -30,6 +30,34 @@ uint8_t moistureSensor(TVOLT * voltage) {
 	return (uint8_t)moistResult;
 }
 
+void moistSensPwrUp(volatile uint8_t *S_DDR, volatile uint8_t *S_PORT, uint8_t sensorMask) {
+	*S_DDR |= sensorMask;
+	*S_PORT |= sensorMask;
+}
+
+void moistSensPwrDwn(volatile uint8_t *S_DDR, volatile uint8_t *S_PORT, uint8_t sensorMask) {
+	*S_PORT &= ~sensorMask;
+}
+
+void moistCheckStart(uint8_t *flag, uint8_t *sensNo) {
+	if(*flag == 1) {
+		moistSensPwrUp(&DDRA, &PORTA, (1 << 6));
+		if(*sensNo > MOIST_SENSORS_NUMBER) {
+			*sensNo = 0;
+			*flag = 0;
+			moistSensPwrDwn(&DDRA, &PORTA, (1 << 6));
+		}
+	}
+}
+void moistCheckResult(uint8_t flag, TVOLT *mSens, uint8_t *sensNo, uint8_t *result) {
+	if(flag == 1) {
+		uint16_t adcMoist1 = adcOversample(*sensNo, 3);
+		voltAdc(adcMoist1, &mSens[*sensNo]);
+		result[*sensNo] = moistureSensor(&mSens[*sensNo]);
+		moistSensPwrDwn(&DDRA, &PORTA, (1 << 6));
+		++*sensNo;
+	}
+}
 //TODO: implement code below
 /*
 //check values for calibration

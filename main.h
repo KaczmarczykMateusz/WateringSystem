@@ -47,8 +47,9 @@ TEMP temp;
 
 double wf;
 char printLCDBuffer[50];
-//double temp;
 
 char currTemp[9];
+uint8_t lightStrength;
+uint8_t moisture[3];
 
 #endif
