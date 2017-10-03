@@ -15,15 +15,15 @@
 #include <avr/interrupt.h>
 
 #define SEC_CHANGED_SET		timeFlag |= (1 << 0)
-#define SEC_CHANGED_CHECK	timeFlag &= (1 << 0)
+#define SEC_CHANGED_CHECK	timeFlag & (1 << 0)
 #define SEC_CHANGED_CLEAR	timeFlag &= ~(1 << 0)
 
 #define MIN_CHANGED_SET		timeFlag |= (1 << 1)
-#define MIN_CHANGED_CHECK	timeFlag &= (1 << 1)
+#define MIN_CHANGED_CHECK	timeFlag & (1 << 1)
 #define MIN_CHANGED_CLEAR	timeFlag &= ~(1 << 1)
 
 #define DAY_CHANGED_SET		timeFlag |= (1 << 2)
-#define DAY_CHANGED_CHECK	timeFlag &= (1 << 2)
+#define DAY_CHANGED_CHECK	timeFlag & (1 << 2)
 #define DAY_CHANGED_CLEAR	timeFlag &= ~(1 << 2)
 
 #include "keyboard.h"

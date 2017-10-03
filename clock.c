@@ -102,6 +102,7 @@ void timeDivision(time *tmp) {
 		if(tmp->hour>23) {
 			tmp->hour = 0;
 			tmp->day++;
+			DAY_CHANGED_SET;
 		}
 	}
 	if(second>59) {
