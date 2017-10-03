@@ -28,6 +28,8 @@ void outON(void);
 void outAlarm(void);
 void uartWriteCurrTime(void);
 void uartWriteTemp(TEMP * temperature);
+void uartWriteLight(uint8_t percent);
+void uartWriteMoisture(uint8_t sensorID, uint8_t *percent);
 void uartWriteSensorData(void);
 
 #endif

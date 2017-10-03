@@ -78,10 +78,25 @@ void uartWriteCurrTime(void) {
 }
 
 void uartWriteTemp(TEMP * temperature) {
+	uartPuts("Temp. ");
 	sendInteger(temp.tempInt);
 	uartPuts(".");
 	sendInteger(temp.tempFract);
 	uartPuts("*C");
+}
+
+void uartWriteLight(uint8_t percent) {
+	uartPuts("Light: ");
+	sendInteger(percent);
+	uartPuts("%");
+}
+
+void uartWriteMoisture(uint8_t sensorID, uint8_t *percent) {
+	char moistString[30];
+	for(uint8_t i=0; i < sensorID; i++) {
+		sprintf(moistString, "Moisture sensor No.%d: %d%%\n\r", i, percent[i]);
+		uartPuts(moistString);
+	}
 }
 
 void uartWriteSensorData(void) {
