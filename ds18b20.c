@@ -112,11 +112,14 @@ void oneWireWriteByte(uint8_t byte)
 uint8_t oneWireReadByte(void) {
 	uint8_t i, byte = 0;
 
+	ONEWIRE_IN;				// Output '0' or input without pullup
 
-	return(0);
 	for(i=0; i<8; i++) {
+		if(oneWireReadBit()) {
+			byte |= (1<<i);
 		}
 	}
+	return byte;
 }
 
 /*************************************************************************
@@ -141,20 +144,23 @@ void ds18b20_Search_ROM(void) {
 }
 
 
-	SET_IN_ONEWIRE_DDR;
 /*************************************************************************
+ Function: 	ds18b20_Read()
+ Purpose:	Read entire message from sensor scratchpad
+ Input:		Array to input schratchpad data into
+ Returns:	Success ('1') or failure ('0')
  **************************************************************************/
+uint8_t ds18b20_Read(uint8_t scratchpad[]) {
+	uint8_t i;
 
-	for (i=0; i<8; i++) {
-		SET_OUT_ONEWIRE_DDR;
-		_delay_us(7);
-		SET_IN_ONEWIRE_DDR;
-		_delay_us(7);
-		byte >>= 1;
 	if(!oneWireReset()) return 0;
+	//oneWireWriteByte(0x55); // MATCH ROM
+	oneWireWriteByte(0xCC); // SKIP ROM
 
-			byte |= 0x80;
+	oneWireWriteByte(0xbe); // READ SCRATCHPAD
 
+	for(i=0; i<9; i++) {
+		scratchpad[i] = oneWireReadByte();
 	}
 
 	return 1;
