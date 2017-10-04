@@ -38,13 +38,12 @@ int main(void)
 	moist[1].ref_v = 234;
 	moist[1].ref_adc = 2100;
 
-	uartInit( UART_BAUD_SELECT(9600, 16000000L) );
+	uartInit( UART_BAUD_SELECT(115200, 16000000L) );
 	uartFlush();
 	relOFF();
 	outOFF();
 	alarmActive = 0;
 	uint8_t resetSecond;
-
 	while (1) {
 		if(setTime(&setBtn, &global)) {
 			resetSecond = 1;
@@ -78,7 +77,7 @@ int main(void)
         	timeDivision(&global);
 
 			// TODO: Imlement UART error check
-
+        	// TODO: Imlement temperature sensor error display
 			sprintf(printLCDBuffer,"%02d:%02d:%02d %d%%",global.hour, global.minute, global.second, lightStrength );
 			LCD_Clear();
             LCD_GoTo(0,0);					
