@@ -22,6 +22,7 @@
 #include "lcd.h"
 #include "adc.h"
 #include "keyboard.h"
+#include "dataParsing.h"
 
 #define MOIST_SENSORS_NUMBER 2
 

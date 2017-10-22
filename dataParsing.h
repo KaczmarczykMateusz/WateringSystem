@@ -33,5 +33,6 @@ void parse_uart_data(char *pBuf);
    @return  none
 */
 void sendInteger(uint16_t passedValue);
+uint8_t flipInteger(int8_t digit);
 
 #endif

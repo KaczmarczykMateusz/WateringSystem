@@ -9,17 +9,15 @@
 #include "moistureSensor.h"
 
 uint8_t moistureSensor(TVOLT * voltage) {
-	moistSensMinOut = 200UL; // value in volt multiplied "* 100"
-	moistSensMaxOut = 455UL; // Maximum value which may be shown by sensor (drought) multiplied "*100" minus "-1"
+	moistSensMinOut = 200;
+	moistSensMaxOut = 455;
 	moistResult = (int32_t)voltage->adcVoltRaw;
 	moistResult -= moistSensMinOut;
 	moistSensMaxOut -= moistSensMinOut;
 
-	tempMoist = 1000000/moistSensMaxOut;
-	moistResult = tempMoist * moistResult;
-	moistResult /= 10000;
-	moistResult *= (-1);
-	moistResult += 100;
+	moistResult = ((1000000/moistSensMaxOut) * moistResult)/10000;
+
+	moistResult = flipInteger((int8_t)moistResult);
 
 	if(moistResult <= 1) {
 		moistResult = 0;

@@ -76,3 +76,13 @@ void sendInteger(uint16_t passedValue) {
 		uartPuts(" ");
 	}
 }
+
+uint8_t flipInteger(int8_t digit) {
+	if(digit) {
+		digit *= (-1);
+		digit += 100;
+		return (uint8_t) digit;
+	} else {
+		return 100;
+	}
+}
