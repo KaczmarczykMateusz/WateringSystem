@@ -51,10 +51,12 @@ void rt_clock_init(void);
 
 /** @brief  Setting time as 24h format by user
  *  @param  Struct consisting of button parameters
- *  @param  Struct consisting of time to be set
+ *  @param  Struct consisting of time to be set or NULL
+ *  @param	Variable to be incremented or NULL
  *  @return Set if time got changed, and modify time values
+ *  @notice	val and tmp are interchangable
  */
-uint8_t setTime(tButton * btn, time *tmp);
+uint8_t increment(tButton * btn, uint8_t *val, time *tmp);
 
 /** @brief  Time transforming from seconds into universal format
  * 	adding seconds into minutes etc.

@@ -39,29 +39,39 @@ void rt_clock_init(void) {
 }
 
 /*************************************************************************
- Function: setTime()
+ Function: increment()
  Purpose:  Setting time with push button
  Input:    Struct with button parameters and struct with time to be set
  Returns:  Set if time got changed
  **************************************************************************/
-uint8_t setTime(tButton * btn, time *tmp) {
-	static uint8_t longPress;
-	static uint8_t shortenDelay;
+uint8_t increment(tButton * btn, uint8_t *val, time *tmp) {
+	static uint8_t longPress = 0;
+	static uint8_t shortenDelay = 0;
 	uint8_t timeModified = 0;
+
 	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
 	if (!(key_press)) {
-		tmp->minute++;
-		tmp->second = 0;
+		uint8_t temporaryVal = 1;
 		timeModified = 1;
 		if (longPress > 30) {
-			tmp->hour ++;
+			temporaryVal += 60;
 		} else if (longPress > 15) {
-			tmp->minute += 30;
+			temporaryVal += 30;
 		} else if (longPress > 0) {
-			tmp->minute += 3;
+			temporaryVal += 3;
 		}
 
-		timeDivision(tmp);
+		if(tmp) {
+			if(temporaryVal >= 60) {
+				tmp->hour ++;
+			} else {
+				tmp->minute += temporaryVal;
+			}
+			timeDivision(tmp);
+		} else {
+			*val += temporaryVal;
+		}
+
 		if(shortenDelay == 0) {
 			_delay_ms(120);
 		}
@@ -112,7 +122,7 @@ void timeDivision(time *tmp) {
 
 /*************************************************************************
  Function: timeToSeconds()
- Purpose:  Transform time HH:MM:SS into seconds
+ Purpose:  Transform time HH:MM into seconds
  Input:    Struct with time to be transformed
  Returns:  none
  **************************************************************************/
@@ -126,7 +136,7 @@ uint32_t timeToSeconds(time *tmp){
  Input:
  Returns:  none
  **************************************************************************/
-void userTimer(uint32_t turnOnTime, uint32_t turnOffTime, void (*actionON)(void), void (*actionOFF)(void), uint32_t currentTime) {
+void userTimer(uint32_t turnOnTime, uint32_t activeTime, void (*actionON)(void), void (*actionOFF)(void), uint32_t currentTime) {
 	static uint8_t checkPreset = 0;
 	if(currentTime == turnOnTime) {
 		if(checkPreset == 0) {
@@ -134,8 +144,14 @@ void userTimer(uint32_t turnOnTime, uint32_t turnOffTime, void (*actionON)(void)
 			if(actionON) actionON();
 		}
 	}
+	uint32_t passedTime = 0;
 
-	if(currentTime == turnOffTime) {
+	if(currentTime > turnOnTime){
+		passedTime = currentTime - turnOnTime;
+	}
+
+
+	if(passedTime == activeTime) {
 		if(checkPreset == 1) {
 			checkPreset = 0;
 			if(actionOFF) actionOFF();
