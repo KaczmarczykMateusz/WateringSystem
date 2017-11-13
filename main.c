@@ -7,7 +7,7 @@
  ============================================================================
  */
 #include "main.h"
-#include "math.h"
+#include <math.h>
 
 int main(void)
 {
@@ -43,24 +43,36 @@ int main(void)
 	relOFF();
 	outOFF();
 	alarmActive = 0;
-	uint8_t resetSecond;
+	uint8_t resetSecond = 0;
+
+	minMoist = 0;
+
+
+	registerStartActionCallback(turnAlarmOn);
+	registerEndActionCallback(turnAlarmOff);
+	lockMainScreen = 0;
+
 	while (1) {
-		if(setTime(&setBtn, &global)) {
-			resetSecond = 1;
-		} else {
-			resetSecond = 0;
+		if(!lockMainScreen) {
+			if(increment(&setBtn, NULL, &global)) {
+				resetSecond = 1;
+			} else {
+				resetSecond = 0;
+			}
 		}
 
 		ds18b20_ConvertT();
-		keyLongPress(&selectBtn, relON, timerSetMode);
+		keyLongPress(&selectBtn, timerSetModeNextStep, relON);
 		keyLongPress(&stopBtn, turnAlarmOff, NULL);
 
 		uartCheck(parse_uart_data);
 
-        if(SEC_CHANGED_CHECK) {
+        if(	(SEC_CHANGED_CHECK) &&
+        	(!lockMainScreen)) {
+        	SEC_CHANGED_CLEAR;
 	        if(MIN_CHANGED_CHECK) {
 	        	moistCheck = 1;
-	        	userTimer(timeToSeconds(&turnOnTime), timeToSeconds(&turnOffTime), turnAlarmOn, turnAlarmOff, timeToSeconds(&global));
+	//        	userTimer(timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), turnAlarmOn, turnAlarmOff, timeToSeconds(&global));
 	        	MIN_CHANGED_CLEAR;
 	        }
 
@@ -78,11 +90,7 @@ int main(void)
 
 			// TODO: Imlement UART error check
         	// TODO: Imlement temperature sensor error display
-			sprintf(printLCDBuffer,"%02d:%02d:%02d %d%%",global.hour, global.minute, global.second, lightStrength );
-			LCD_Clear();
-            LCD_GoTo(0,0);					
-			LCD_WriteText(printLCDBuffer);
-			SEC_CHANGED_CLEAR;
+
 
 			if(dsFlag == 1) {
 				readTemperature(&temp);
@@ -100,42 +108,51 @@ int main(void)
 			uartWriteLight(lightStrength);
 			uartPuts("\n\r");
 			uartWriteMoisture(MOIST_SENSORS_NUMBER, moisture);
-			LCD_GoTo(0,1);
-			LCD_WriteText(currTemp);
-	        outAlarm();
 
-			while(setTimerFlag) {
-				keyPress(&selectBtn, exitTimerSetOnMode);
-				setTime(&setBtn, &turnOnTime);
-				sprintf(printLCDBuffer,"%02d:%02d:%02d", turnOnTime.hour, turnOnTime.minute, turnOnTime.second);
-				if(SEC_CHANGED_CHECK) {
-					LCD_Clear();
-					LCD_WriteText("Set timer ON");
-					LCD_GoTo(0,1);
-					LCD_WriteText(printLCDBuffer);
-					SEC_CHANGED_CLEAR;
-					if(!executedFlag) {
-						executedFlag = 1;
-					}
-		        	global.second = second;
-					timeDivision(&global);
-				}
+			if(!lockMainScreen) {
+				sprintf(printLCDBuffer,"%02d:%02d:%02d %d%%",global.hour, global.minute, global.second, lightStrength );
+				LCD_Clear();
+				LCD_GoTo(0,0);
+				LCD_WriteText(printLCDBuffer);
+				LCD_GoTo(0,1);
+				LCD_WriteText(currTemp);
 			}
-			while(executedFlag) {
-				setTime(&setBtn, &turnOffTime);
-				keyLongPress(&selectBtn, exitTimerSetMode, NULL);
-				sprintf(printLCDBuffer,"%02d:%02d:%02d", turnOffTime.hour, turnOffTime.minute, turnOffTime.second);
-				if(SEC_CHANGED_CHECK) {
-					LCD_Clear();
-					LCD_WriteText("Set timer OFF");
-					LCD_GoTo(0,1);
-					LCD_WriteText(printLCDBuffer);
-					SEC_CHANGED_CLEAR;
-		        	global.second = second;
-					timeDivision(&global);
-				}
-			}
+	        outAlarm();
+// TODO take the lowest or avarage moisture and pass it to conditional switch
+			updateConditionalSwitch(timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), minMoist, 0);
+			updateSensorValues(moisture[0], temp.tempMultip, 0, lightStrength);
+			conditionalSwitch(timeToSeconds(&global), alarmActive);// TODO:implement enabling/ disabling alarm
         }
+
+
+//	****** MENU *******
+		switch(setTimerFlag) {
+		case 1:
+			increment(&setBtn, NULL, &turnOnTime);
+			sprintf(printLCDBuffer, "Set timer ON");
+			menuItem(&setTimerFlag, &turnOnTime, &setBtn, printLCDBuffer);
+		break;
+
+		case 2:
+			increment(&setBtn, NULL, &activeTime);
+			sprintf(printLCDBuffer, "Set period");
+			menuItem(&setTimerFlag, &activeTime, &setBtn, printLCDBuffer);
+		break;
+
+		case 3:
+			increment(&setBtn, &minMoist, NULL);
+			sprintf(printLCDBuffer, "Minimum moisture");
+			menuItem(&minMoist, NULL, &setBtn, printLCDBuffer);
+		break;
+
+		case 4:
+			setTimerFlag = 0;
+			lockMainScreen = 0;
+		break;
+
+		default:
+			setTimerFlag = 0;
+		}
 //      goToSleep();
 	}
 }

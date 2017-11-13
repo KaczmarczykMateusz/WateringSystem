@@ -41,15 +41,19 @@
 
 time global;
 time turnOnTime;
-time turnOffTime;
+time activeTime;
+
+condSwitch switchConditions;
+value val;
 
 TEMP temp;
 
 double wf;
-char printLCDBuffer[50];
+char printLCDBuffer[16];
 
 char currTemp[9];
 uint8_t lightStrength;
 uint8_t moisture[3];
+uint8_t minMoist;
 
 #endif

@@ -13,6 +13,8 @@
  	 	 	   - Functions
  	 	 	   Except Search ROM and Alarm SEARCH where master has to return
  	 	 	   to first step after sending those commands
+
+ 	 	 	   Sensor need external pull up resistor on BUS line
  ============================================================================
  */
 
@@ -39,7 +41,6 @@ uint8_t oneWireReset() {
 		_delay_us(500);
 		return(1);				// Ready for ROM commands
 	}
-
 	_delay_us(500);
 
 	return(0);

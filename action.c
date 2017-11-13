@@ -8,16 +8,8 @@
  */
 #include "action.h"
 
-void timerSetMode(void) {
-	setTimerFlag = 1;
-}
-
-void exitTimerSetOnMode(void) {
-	setTimerFlag = 0;
-}
-
-void exitTimerSetMode(void) {
-	executedFlag = 0;
+void timerSetModeNextStep(void) {
+	setTimerFlag++;
 }
 
 void relOFF(void) {
@@ -59,6 +51,9 @@ void outON(void) {
 	ALARM_ON;
 }
 
+
+
+
 void uartWriteCurrTime(void) {
 	if(global.hour < 10) {
 		uartPuts("0");
@@ -99,6 +94,34 @@ void uartWriteMoisture(uint8_t sensorID, uint8_t *percent) {
 	}
 }
 
+void uartWriteWaterflow(uint32_t perMinute, uint32_t accumulated) {
+		sendInteger(accumulated);
+		sendInteger(perMinute);
+}
+
 void uartWriteSensorData(void) {
 	//TODO: implement function sending all sensor data
+}
+
+
+void menuItem(uint8_t *executedFlag, time *actionTime, tButton * btn, char *buff) {
+	lockMainScreen = 1;
+	if(*executedFlag > 100) {
+		*executedFlag = 100;
+	}
+	if(SEC_CHANGED_CHECK) {
+		LCD_Clear();
+		LCD_WriteText(buff);
+		if(actionTime) {
+			sprintf(buff,"%02d:%02d:%02d", actionTime->hour, actionTime->minute, actionTime->second);
+		} else if(executedFlag){
+			sprintf(buff,"%d%%", *executedFlag);
+		}
+		LCD_GoTo(0,1);
+		LCD_WriteText(buff);
+
+		SEC_CHANGED_CLEAR;
+		global.second = second;
+		timeDivision(&global);
+	}
 }
