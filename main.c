@@ -51,6 +51,9 @@ int main(void)
 	minMoist = 0;
 	sensorNumber  = 0;
 
+	condSwitch switchConditions; // todo: throw it out from header file and define here
+	value val;
+
 	uint8_t temporaryLockFlag = 1;
 	while (1) {
 		if(!lockMainScreen) {
@@ -114,9 +117,9 @@ int main(void)
 			}
 	        outAlarm();
 // TODO take the lowest or avarage moisture and pass it to conditional switch
-			updateConditionalSwitch(timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), minMoist, 0);
-			updateSensorValues(moisture[0], temp.tempMultip, 0, lightStrength);
-			conditionalSwitch(timeToSeconds(&global), alarmActive);// TODO:implement enabling/ disabling alarm
+	        updateConditionalSwitch(&switchConditions, timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), minMoist, 0);
+			updateSensorValues(&val, moisture[0], temp.tempMultip, 0, lightStrength);
+			conditionalSwitch(&switchConditions, &val, timeToSeconds(&global), alarmActive);// TODO:implement enabling/ disabling alarm
 
  //       	if(!temporaryLockFlag) {
         		moisture[sensorNumber] = moistCheckResult(temporaryLockFlag, moist ,&sensorNumber);

@@ -43,9 +43,6 @@ time global;
 time turnOnTime;
 time activeTime;
 
-condSwitch switchConditions;
-value val;
-
 TEMP temp;
 
 double wf;
