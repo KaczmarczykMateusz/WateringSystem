@@ -24,9 +24,6 @@ int main(void)
 	tButton selectBtn = btnInit(&DDRD, &PORTD, &PIND, SELECT_BTN_MASK);
 	tButton stopBtn = btnInit(&DDRD, &PORTD, &PIND, STOP_BTN_MASK);
 
-	uint8_t dsFlag = 0;
-	uint8_t moistCheck = 1;
-
 	TVOLT light;
 	light.ref_v = 234;
 	light.ref_adc = 2100;
@@ -42,47 +39,44 @@ int main(void)
 	uartFlush();
 	relOFF();
 	outOFF();
-	alarmActive = 0;
-	uint8_t resetSecond = 0;
-
-	minMoist = 0;
-
 
 	registerStartActionCallback(turnAlarmOn);
 	registerEndActionCallback(turnAlarmOff);
-	lockMainScreen = 0;
 
+	uint8_t dsFlag = 0;
+	MIN_CHANGED_SET;
+	lockMainScreen = 0;
+	alarmActive = 0;
+	uint8_t resetSecond = 0;
+	minMoist = 0;
+	sensorNumber  = 0;
+
+	uint8_t temporaryLockFlag = 1;
 	while (1) {
 		if(!lockMainScreen) {
-			if(increment(&setBtn, NULL, &global)) {
-				resetSecond = 1;
-			} else {
-				resetSecond = 0;
-			}
+			resetSecond = incrDcr(&setBtn, NULL, NULL, &global) ? 1 : 0;
+			keyPress(&stopBtn, turnAlarmOff);	// @brief: stops alarm or watering ONLY while it's running
 		}
 
-		ds18b20_ConvertT();
 		keyLongPress(&selectBtn, timerSetModeNextStep, relON);
-		keyLongPress(&stopBtn, turnAlarmOff, NULL);
 
 		uartCheck(parse_uart_data);
 
         if(	(SEC_CHANGED_CHECK) &&
         	(!lockMainScreen)) {
         	SEC_CHANGED_CLEAR;
+
 	        if(MIN_CHANGED_CHECK) {
-	        	moistCheck = 1;
-	//        	userTimer(timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), turnAlarmOn, turnAlarmOff, timeToSeconds(&global));
-	        	MIN_CHANGED_CLEAR;
+	        	voltAdc(adcOversample(0x07, 3), &light); // replace this name with adcConvert(adcOversample(0x07, 3), &light);
+	        	lightStrength = lightSensor(&light); // TODO: implement pwrUp and pwrDown even though we can check brightness constantly there is no need so better save power
+
+	//        	userTimer(timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), turnAlarmOn, activeTime, timeToSeconds(&global)); // calls simple alarm
+	        	if(!moistCheckStart(&temporaryLockFlag, &sensorNumber)) {
+	        		MIN_CHANGED_CLEAR;
+	        	}
 	        }
 
-	        moistCheckStart(&moistCheck, &sensorNumber);
-
-           	uint16_t adcOversampled = adcOversample(0x07, 3);
-            voltAdc(adcOversampled, &light);
-            lightStrength = lightSensor(&light);
-
-        	if(resetSecond) {
+        	if(resetSecond == 1) {
         		second = 0;
         	}
         	global.second = second;
@@ -91,15 +85,16 @@ int main(void)
 			// TODO: Imlement UART error check
         	// TODO: Imlement temperature sensor error display
 
-
-			if(dsFlag == 1) {
-				readTemperature(&temp);
-				sprintf(currTemp,"%2ld.%01ld\xdf""C", temp.tempInt, temp.tempFract);
-				dsFlag = 0;
-			} else {
+        	// @brief: check temperature,letting sensor at least 750ms for conversion (in this case even more than one second)
+			if(!dsFlag) {			//	Start conversion
+				ds18b20_ConvertT();
 				dsFlag = 1;
+			} else {				// Read converted temperature
+				readTemperature(&temp);
+				sprintf(currTemp, "%2ld.%01ld\xdf""C", temp.tempInt, temp.tempFract);
+				dsFlag = 0;
 			}
-			moistCheckResult(moistCheck, moist ,&sensorNumber, moisture);
+
 			uartPuts("\f");
 			uartWriteCurrTime();
 			uartPuts("\n\r");
@@ -122,25 +117,31 @@ int main(void)
 			updateConditionalSwitch(timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), minMoist, 0);
 			updateSensorValues(moisture[0], temp.tempMultip, 0, lightStrength);
 			conditionalSwitch(timeToSeconds(&global), alarmActive);// TODO:implement enabling/ disabling alarm
+
+ //       	if(!temporaryLockFlag) {
+        		moisture[sensorNumber] = moistCheckResult(temporaryLockFlag, moist ,&sensorNumber);
+   //     		temporaryLockFlag = 1;
+    //    	}
         }
 
 
 //	****** MENU *******
 		switch(setTimerFlag) {
+
 		case 1:
-			increment(&setBtn, NULL, &turnOnTime);
+			incrDcr(&setBtn, &stopBtn, NULL, &turnOnTime);
 			sprintf(printLCDBuffer, "Set timer ON");
 			menuItem(&setTimerFlag, &turnOnTime, &setBtn, printLCDBuffer);
 		break;
 
 		case 2:
-			increment(&setBtn, NULL, &activeTime);
+			incrDcr(&setBtn, &stopBtn, NULL, &activeTime);
 			sprintf(printLCDBuffer, "Set period");
 			menuItem(&setTimerFlag, &activeTime, &setBtn, printLCDBuffer);
 		break;
 
 		case 3:
-			increment(&setBtn, &minMoist, NULL);
+			incrDcr(&setBtn, &stopBtn, &minMoist, NULL);
 			sprintf(printLCDBuffer, "Minimum moisture");
 			menuItem(&minMoist, NULL, &setBtn, printLCDBuffer);
 		break;

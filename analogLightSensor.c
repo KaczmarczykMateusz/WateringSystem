@@ -19,7 +19,7 @@ uint8_t lightSensor(TVOLT * voltage) {
 	light = voltage->adcVoltRaw;
 	maxValue = 454;
 	light = (1000000/maxValue) * light;
-	light /= 10000;
+	light *= 0.0001f;
 
 	if(light > 100) {
 		light = 100;

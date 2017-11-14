@@ -3,19 +3,26 @@
  Name        : moistureSensor.c
  Author      : Mateusz Kaczmarczyk
  Version     :
- Description : TODO: replace floating points with integers
+ Description :
  ============================================================================
  */
 #include "moistureSensor.h"
 
+/*************************************************************************
+ Function: moistureSensor()
+ Purpose:  Process entire ADC conversion from the beginning till the end.
+ Input:    ADC voltage struct
+ Return:	Moisture as percents
+ **************************************************************************/
 uint8_t moistureSensor(TVOLT * voltage) {
-	moistSensMinOut = 200;
+	uint32_t moistResult;
+	moistSensMinOut = 200;					//TODO: needs calibration
 	moistSensMaxOut = 455;
 	moistResult = (int32_t)voltage->adcVoltRaw;
 	moistResult -= moistSensMinOut;
 	moistSensMaxOut -= moistSensMinOut;
 
-	moistResult = ((1000000/moistSensMaxOut) * moistResult)/10000;
+	moistResult = ((1000000/moistSensMaxOut) * moistResult) *  0.0001f;
 
 	moistResult = flipInteger((int8_t)moistResult);
 
@@ -28,35 +35,70 @@ uint8_t moistureSensor(TVOLT * voltage) {
 	return (uint8_t)moistResult;
 }
 
+/*************************************************************************
+ Function: moistSensPwrUp()
+ Purpose:  Power up single sensor
+ Input:    Parameters of ADC PIN to be turned ON
+ **************************************************************************/
 void moistSensPwrUp(volatile uint8_t *S_DDR, volatile uint8_t *S_PORT, uint8_t sensorMask) {
 	*S_DDR |= sensorMask;
 	*S_PORT |= sensorMask;
 }
 
+/*************************************************************************
+ Function: moistSensPwrDwn()
+ Purpose:  Shut down single sensor
+ Input:    Parameters of ADC PIN to be turned OFF
+ **************************************************************************/
 void moistSensPwrDwn(volatile uint8_t *S_DDR, volatile uint8_t *S_PORT, uint8_t sensorMask) {
 	*S_PORT &= ~sensorMask;
 }
 
-void moistCheckStart(uint8_t *flag, uint8_t *sensNo) {
-	if(*flag == 1) {
-		moistSensPwrUp(&DDRA, &PORTA, (1 << 6));
-		if(*sensNo > MOIST_SENSORS_NUMBER) {
+/*************************************************************************
+ Function: moistCheckStart()
+ Purpose:  Powers up sensors to prepare them for ADC conversion
+ Input:    Number of sensor to be powered
+ Returns:  Flag confirming that some of sensors is powered
+ **************************************************************************/
+uint8_t moistCheckStart(uint8_t *flag, uint8_t *sensNo) {
+		moistSensPwrUp(&DDRA, &PORTA, MOIST_SENSOR_POWER_MASK);
+		if(*sensNo >= MOIST_SENSORS_NUMBER) {
 			*sensNo = 0;
 			*flag = 0;
-			moistSensPwrDwn(&DDRA, &PORTA, (1 << 6));
+		} else {
+			*flag = 1;
 		}
-	}
+	return *flag;
 }
-void moistCheckResult(uint8_t flag, TVOLT *mSens, uint8_t *sensNo, uint8_t *result) {
-	if(flag == 1) {
+
+/*************************************************************************
+ Function: moistCheckResult()
+ Purpose:  Reading result of ADC conversion directly in percent, it's
+ 	 	 	called when it's sure that sensors are stable powered
+ Input:    Struct with ADC voltage parameters, number of sensor
+ Returns:  Moisture as percent
+ **************************************************************************/
+uint8_t moistCheckResult(uint8_t flag, TVOLT *mSens, uint8_t *sensNo) {
+	uint8_t temporaryMoist = 0;
+	if(flag) {
 		uint16_t adcMoist1 = adcOversample(*sensNo, 3);
 		voltAdc(adcMoist1, &mSens[*sensNo]);
-		result[*sensNo] = moistureSensor(&mSens[*sensNo]);
-		moistSensPwrDwn(&DDRA, &PORTA, (1 << 6));
-		++*sensNo;
+
+		temporaryMoist = moistureSensor(&mSens[*sensNo]);
+		// Increment until MOIST_SENSORS_NUMBER which as index is one higher than sensor with highest index
+		// when value reaches maximum it makes moistCheckStart to disable further checks
+		if(*sensNo < MOIST_SENSORS_NUMBER) {
+			++*sensNo;
+		}
 	}
+	moistSensPwrDwn(&DDRA, &PORTA, MOIST_SENSOR_POWER_MASK);
+
+	return temporaryMoist;
 }
-//TODO: implement code below
+
+
+
+//TODO: concern implementing or removing code below
 /*
 //check values for calibration
 void checkMoistSensor(void) {
@@ -64,7 +106,6 @@ void checkMoistSensor(void) {
 	LCD_Clear();
 	LCD_GoTo(0,0);
 	LCD_WriteText(bufferLCD);
-
 	float currentMoist = (float)adcOversampleEfficient();
 	//convert result to percent increasing (flip ADC result)
 	if(currentMoist > 0) {
@@ -78,15 +119,12 @@ void checkMoistSensor(void) {
 	LCD_GoTo(0,1);
 	LCD_WriteText(bufferLCD);
 	_delay_ms(1000);
-
 	sprintf(bufferLCD, "Continue: 'sel'");
 	LCD_Clear();
 	LCD_GoTo(0,0);
 	LCD_WriteText(bufferLCD);
 	_delay_ms(1000);
-
 }
-
 void calibrateMoistSensor(tButton * setBtn, tButton * selectBtn) {
 	key_press(selectBtn, choiceOfMenu, NULL);
 	if(choseMenu == 0) {
@@ -107,23 +145,18 @@ void calibrateMoistSensor(tButton * setBtn, tButton * selectBtn) {
 // Max moist is used to calibrate sensor, if set to zero put sensor to water and read value which you save to this variable
 /*float measureMoisture(void) {
 	maxMoist = 70;
-
 	if(maxMoist) {
 		uint16_t currentMoist = (double)adcOversampleEfficient();
 		int8_t moistureAsPercent;
-
 		//convert result to percent increasing (flip ADC result)
 		if(currentMoist > 0) {
 			float maxMoistTemp = (float)(float)maxMoist/100 * 8192;
-
 			uint16_t scope = 8192 - (8192 - maxMoistTemp);
 			float scopePercent = (float)100 / scope;
-
 			currentMoist -= 8192 - maxMoistTemp;
 			moistureAsPercent = (currentMoist * scopePercent);
 			moistureAsPercent *= (-1);
 			moistureAsPercent += 100;
-
 		} else {
 			moistureAsPercent = 0;
 		}
@@ -131,7 +164,6 @@ void calibrateMoistSensor(tButton * setBtn, tButton * selectBtn) {
 	}
 	return 199; // Error
 }
-
 uint8_t writeMoisture(volatile uint8_t * KPIN) {
 	MOISR_SENSORS_INIT;
 	uint8_t enableSystemOn = 0;
@@ -142,7 +174,6 @@ uint8_t writeMoisture(volatile uint8_t * KPIN) {
 	}
 	return enableSystemOn;
 }
-
 void moisturePrintOnLCD(void) {
 	uint8_t i;
 	for(i=0; i<7; i+=2) {
@@ -151,16 +182,13 @@ void moisturePrintOnLCD(void) {
 			LCD_Clear();
 			LCD_GoTo(0,0);
 			LCD_WriteText(bufferLCD);
-
 			sprintf(bufferLCD, "Sensor %d: :%d%%", i, moistSensors[i]);
 			LCD_GoTo(0,1);
 			LCD_WriteText(bufferLCD);
-
 			_delay_ms(1000);
 		}
 	}
 }
-
 void incrementMinVal(void) {
 	if(minMoist<=100) {
 	 ++minMoist;
@@ -168,7 +196,6 @@ void incrementMinVal(void) {
 	 minMoist = 0;
 	}
 }
-
 void incrementMaxVal(void) {
 	if(maxMoist<=100) {
 	 ++maxMoist;
@@ -176,7 +203,6 @@ void incrementMaxVal(void) {
 	 maxMoist = 0;
 	}
 }
-
 void choiceOfMenu(void) {
 	if(choseMenu < 1) {
 		++choseMenu;
