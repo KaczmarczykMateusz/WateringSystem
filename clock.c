@@ -39,62 +39,6 @@ void rt_clock_init(void) {
 }
 
 /*************************************************************************
- Function: increment()
- Purpose:  Setting time with push button
- Input:    Struct with button parameters and struct with time to be set
- Returns:  Set if time got changed
- **************************************************************************/
-uint8_t increment(tButton * btn, uint8_t *val, time *tmp) {
-	static uint8_t longPress = 0;
-	static uint8_t shortenDelay = 0;
-	uint8_t timeModified = 0;
-
-	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
-	if (!(key_press)) {
-		uint8_t temporaryVal = 1;
-		timeModified = 1;
-		if (longPress > 30) {
-			temporaryVal += 60;
-		} else if (longPress > 15) {
-			temporaryVal += 30;
-		} else if (longPress > 0) {
-			temporaryVal += 3;
-		}
-
-		if(tmp) {
-			if(temporaryVal >= 60) {
-				tmp->hour ++;
-			} else {
-				tmp->minute += temporaryVal;
-			}
-			timeDivision(tmp);
-		} else {
-			*val += temporaryVal;
-		}
-
-		if(shortenDelay == 0) {
-			_delay_ms(120);
-		}
-		_delay_ms(120);
-		if (!(key_press)) {
-			shortenDelay = 1;
-			if (longPress <= 26) {
-				longPress++;
-			}
-		}
-		SEC_CHANGED_SET;
-	} else {
-		longPress = 0;
-		shortenDelay = 0;
-	}
-	if(timeModified) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-/*************************************************************************
  Function: timeDivision()
  Purpose:  Puts counted by clock seconds into DD:HH:MM:SS format
  Input:    struct with time to be ordered
