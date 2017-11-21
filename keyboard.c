@@ -93,3 +93,90 @@ void keyPushUp(tButton * btn, void (*action)(void)) {
 		}
 	}
 }
+
+
+/*************************************************************************
+ Function: incrDcr()
+ Purpose:  Incrementing and/ or decrementing time or value
+ Input:    Struct with adding and subtracting buttons parameters
+ 	 	   Variable to be modified and its maximum allowed value
+ 	 	   and struct with time to be set
+ Returns:  Set if time got changed
+ **************************************************************************/
+uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t maxVal, time *modTime) {
+	static uint8_t longPress = 0;
+	static uint8_t shorterDelay = 0;
+	uint8_t opPerformed = 0;
+
+	register uint8_t addPressed;
+
+	addPressed = addBtn ? (*addBtn->K_PIN & addBtn->key_mask) : 1;
+	register uint8_t subtrPressed;
+	subtrPressed = subtrBtn ? (*subtrBtn->K_PIN & subtrBtn->key_mask) : 1;
+
+	if (!(addPressed && subtrPressed)) {
+		uint8_t temporaryVal = 1;
+		opPerformed = 1;
+		if (longPress > 30) {
+			temporaryVal += 60;
+		} else if (longPress > 15) {
+			temporaryVal += 30;
+		} else if (longPress > 0) {
+			temporaryVal += 3;
+		}
+
+		if(modTime && !addPressed) {
+			if(temporaryVal >= 60) {
+				modTime->hour ++;
+			} else {
+				modTime->minute += temporaryVal;
+			}
+			timeDivision(modTime);
+		} else if(modTime && !subtrPressed) {
+			if(temporaryVal < 60) {
+				modTime->minute -= temporaryVal;
+			}
+			if(modTime->minute > 59) {
+				modTime->minute = 59;
+				modTime->hour --;
+				if(modTime->hour > 59) {
+					modTime->hour = 23;
+				}
+			}
+			timeDivision(modTime);
+		} else if(modVal && !addPressed) {
+			*modVal += temporaryVal;
+		} else if(modVal && !subtrPressed) {
+			*modVal -= temporaryVal;
+		}
+		if(maxVal == 1) {			//In case if we use toggle mode
+			*modVal = 0;
+		} else {
+			if(*modVal > maxVal) {
+				*modVal = maxVal;
+			}
+		}
+
+
+		if(!shorterDelay) {
+			_delay_ms(120);
+		}
+		_delay_ms(120);
+		if (!(addPressed && subtrPressed)) {
+			shorterDelay = 1;
+			if (longPress <= 26) {
+				longPress++;
+			}
+		}
+		INPUT_MODIFIED_SET;
+	} else {
+		longPress = 0;
+		shorterDelay = 0;
+	}
+
+	if(!opPerformed) {
+		return 0;
+	} else {
+		return 1;
+	}
+}

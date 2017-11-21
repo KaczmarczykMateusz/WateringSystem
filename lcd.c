@@ -144,3 +144,22 @@ void LCD_Initalize(void) {
 	LCD_WriteCommand(HD44780_EM_RIGHT);		// address incrementation and shift of cursor
 	LCD_WriteCommand(HD44780_DISPLAY_ON | HD44780_CURSOR_OFF | HD44780_CURSOR_NOBLINK);	// turn on display without cursor nor blinking
 }
+
+/*************************************************************************
+ Function: printSimpleScreen()
+ Purpose: Print two simple rows with text (2x16) at the LCD from left to right
+ Input: Two rows of text as max 16 char arrays (each one)
+ **************************************************************************/
+void printSimpleScreen(char *row1, char *row2) {
+	LCD_Clear();
+
+	if(row1) {		// Write first line
+		LCD_GoTo(0,0);
+		LCD_WriteText(row1);
+	}
+
+	if(row2) {		// Write second line
+		LCD_GoTo(0,1);
+		LCD_WriteText(row2);
+	}
+}

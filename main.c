@@ -11,7 +11,9 @@
 
 int main(void)
 {
-	OUTPUT_PIN_A111_INIT;
+	enbleSrvceMode = 0;
+	uint8_t minMoist;
+	ALARM_INIT;
 	RELAY_INIT;
 	ALARM_ON;
 
@@ -57,12 +59,16 @@ int main(void)
 	uint8_t temporaryLockFlag = 1;
 	while (1) {
 		if(!lockMainScreen) {
-			resetSecond = incrDcr(&setBtn, NULL, NULL, &global) ? 1 : 0;
+			resetSecond = incrDcr(&setBtn, NULL, NULL, 0, &global) ? 1 : 0;
 			keyPress(&stopBtn, turnAlarmOff);	// @brief: stops alarm or watering ONLY while it's running
 		}
 
-		keyLongPress(&selectBtn, timerSetModeNextStep, relON);
-
+		keyLongPress(&selectBtn, timerSetModeNextStep, serviceModeEntry);
+#if 0
+		if(calibrateMoistSensor(enbleSrvceMode, setTimerFlag, moisture[0], &setBtn, &stopBtn) == 0)	{
+			continue;		//Prevent from entering classic MENU
+		}
+#endif
 		uartCheck(parse_uart_data);
 
         if(	(SEC_CHANGED_CHECK) &&
@@ -119,7 +125,7 @@ int main(void)
 // TODO take the lowest or avarage moisture and pass it to conditional switch
 	        updateConditionalSwitch(&switchConditions, timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), minMoist, 0);
 			updateSensorValues(&val, moisture[0], temp.tempMultip, 0, lightStrength);
-			conditionalSwitch(&switchConditions, &val, timeToSeconds(&global), alarmActive);// TODO:implement enabling/ disabling alarm
+			conditionalSwitch(&switchConditions, &val, timeToSeconds(&global), &alarmActive);// TODO:implement enabling/ disabling alarm
 
  //       	if(!temporaryLockFlag) {
         		moisture[sensorNumber] = moistCheckResult(temporaryLockFlag, moist ,&sensorNumber);
@@ -132,21 +138,24 @@ int main(void)
 		switch(setTimerFlag) {
 
 		case 1:
-			incrDcr(&setBtn, &stopBtn, NULL, &turnOnTime);
+			incrDcr(&setBtn, &stopBtn, NULL, 0, &turnOnTime);
 			sprintf(printLCDBuffer, "Set timer ON");
-			menuItem(&setTimerFlag, &turnOnTime, &setBtn, printLCDBuffer);
+			sprintf(buff1, "%02d:%02d:%02d", turnOnTime.hour, turnOnTime.minute, turnOnTime.second);
+			menuItem(printLCDBuffer, buff1);
 		break;
 
 		case 2:
-			incrDcr(&setBtn, &stopBtn, NULL, &activeTime);
+			incrDcr(&setBtn, &stopBtn, NULL, 0, &activeTime);
 			sprintf(printLCDBuffer, "Set period");
-			menuItem(&setTimerFlag, &activeTime, &setBtn, printLCDBuffer);
+			sprintf(buff1, "%02d:%02d:%02d", activeTime.hour, activeTime.minute, activeTime.second);
+			menuItem(printLCDBuffer, buff1);
 		break;
 
 		case 3:
-			incrDcr(&setBtn, &stopBtn, &minMoist, NULL);
+			incrDcr(&setBtn, &stopBtn, &minMoist, 100, NULL);
 			sprintf(printLCDBuffer, "Minimum moisture");
-			menuItem(&minMoist, NULL, &setBtn, printLCDBuffer);
+			sprintf(buff1, "%d%%", minMoist);
+			menuItem(printLCDBuffer, buff1);
 		break;
 
 		case 4:

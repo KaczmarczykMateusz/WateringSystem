@@ -11,8 +11,10 @@
 #define KEYBOARD_H
 
 #include <avr/io.h>
+#include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "clock.h"
 
 //	@brief Buttons masks definitions
 #define SET_BTN_MASK 	(1<<PD6)
@@ -76,6 +78,20 @@ void keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longPres
  * @return	None
  */
 void keyPushUp(tButton * btn, void (*action)(void));
+
+/**
+ * @brief  Setting time as 24h format by user
+ * 	@param  *addBtn	:	Struct consisting of add button parameters or NULL
+ *  @param  *subtrBtn:	Struct consisting of subtract button parameters or NULLL
+ *  @param  *modVal	:	Struct consisting of time to be set or NULL
+ *  @param	maxVal	:	Maximum value which can be reached by modVal
+ *  					1: enables toggle mode where modVal ALWAYS become (0 or 1)
+ *  @param	*modTime:	Variable to be incremented or NULL
+ *  @return Set if time got changed, and modify time values
+ *  @notice	val and tmp are interchangable
+ */
+uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t maxVal, time *modTime);
+
 
 
 #endif /* KEYBOARD_H */

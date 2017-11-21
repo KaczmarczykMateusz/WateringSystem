@@ -14,6 +14,11 @@
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 
+
+#define INPUT_MODIFIED_SET timeFlag |= (1 << 3)
+#define INPUT_MODIFIED_CHECK timeFlag & (1 << 3)
+#define INPUT_MODIFIED_CLEAR timeFlag &= ~(1 << 3)
+
 #define SEC_CHANGED_SET		timeFlag |= (1 << 0)
 #define SEC_CHANGED_CHECK	timeFlag & (1 << 0)
 #define SEC_CHANGED_CLEAR	timeFlag &= ~(1 << 0)
@@ -25,8 +30,6 @@
 #define DAY_CHANGED_SET		timeFlag |= (1 << 2)
 #define DAY_CHANGED_CHECK	timeFlag & (1 << 2)
 #define DAY_CHANGED_CLEAR	timeFlag &= ~(1 << 2)
-
-#include "keyboard.h"
 
 //  @brief  Flag indicating time changed in ISR
 volatile uint8_t timeFlag;

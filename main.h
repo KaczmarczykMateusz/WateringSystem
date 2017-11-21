@@ -9,15 +9,6 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-// Outputs definitions
-#define RELAY_INIT DDRC |= (1<<PC0)
-#define RELAY_ON    PORTC &= ~(1<<PC0)
-#define RELAY_OFF   PORTC |= (1<<PC0)
-
-#define OUTPUT_PIN_A111_INIT DDRC |= (1<<PC1)
-#define ALARM_ON    PORTC &= ~(1<<PC1)
-#define ALARM_OFF   PORTC |= (1<<PC1)
-
 // CPU 16MHz
 #include <avr/interrupt.h>
 #include <stdio.h>
@@ -47,10 +38,11 @@ TEMP temp;
 
 double wf;
 char printLCDBuffer[16];
+char buff1[16];
 
 char currTemp[9];
 uint8_t lightStrength;
 uint8_t moisture[3];
-uint8_t minMoist;
+
 
 #endif

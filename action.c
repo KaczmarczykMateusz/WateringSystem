@@ -8,6 +8,21 @@
  */
 #include "action.h"
 
+
+// Outputs definitions
+#define RELAY_INIT 		DDRC |= (1<<PC0)
+#define RELAY_ON    	PORTC &= ~(1<<PC0)
+#define RELAY_OFF  		 PORTC |= (1<<PC0)
+#define RELAY_TOGGLE    PORTC ^= (1<<PC0)
+#define IS_RELAY_ON	    PORTC & (1<<PC0)
+
+#define ALARM_INIT 	DDRC |= (1<<PC1)			/// Implement it in main instead of OUTPUT_PIN_A111
+#define ALARM_ON    PORTC &= ~(1<<PC1)
+#define ALARM_OFF   PORTC |= (1<<PC1)
+#define ALARM_TOGGLE    PORTC ^= (1<<PC1)
+#define IS_ALARM_ON	    PORTC & (1<<PC1)
+
+
 void timerSetModeNextStep(void) {
 	setTimerFlag++;
 }
@@ -20,8 +35,24 @@ void relON(void) {
 	RELAY_ON;
 }
 
+void relToggle(void) { // TODO: implement in instead of outON/outOFF
+	RELAY_TOGGLE;
+}
+
+void outON(void) {
+	ALARM_ON;
+}
+
 void outOFF(void) {
 	ALARM_OFF;
+}
+
+void outToggle(void) { // TODO: implement in instead of outON/outOFF
+	ALARM_TOGGLE;
+}
+
+void isOutOn(void) {
+	alarmActive = 1;
 }
 
 void turnAlarmOn(void) {
@@ -33,26 +64,12 @@ void turnAlarmOff(void) {
 }
 
 void outAlarm(void) {
-	static uint8_t alreadyOn = 0;
 	if(alarmActive) {
-		if(alreadyOn) {
-			ALARM_ON;
-			alreadyOn = 0;
-		} else {
-			ALARM_OFF;
-			alreadyOn = 1;
-		}
+		ALARM_TOGGLE;
 	} else {
 		ALARM_OFF;
 	}
 }
-
-void outON(void) {
-	ALARM_ON;
-}
-
-
-
 
 /*************************************************************************
  Function:	uartWriteCurrTime()
@@ -139,103 +156,31 @@ void uartWriteSensorData(TEMP *temperature, uint8_t light, uint8_t moistSenCount
 	uartWriteWaterflow(perMinute, accumulated);
 }
 
-
-void menuItem(uint8_t *executedFlag, time *actionTime, tButton * btn, char *buff) {
-	lockMainScreen = 1;
-	if(*executedFlag > 100) {
-		*executedFlag = 100;
+void serviceModeEntry(void) {
+	enbleSrvceMode ^= (1 << 0);
+	/*
+	if(!enbleSrvceMode) {
+		enbleSrvceMode = 1;
+	} else {
+		enbleSrvceMode = 0;
 	}
-	if(SEC_CHANGED_CHECK) {
-		LCD_Clear();
-		LCD_WriteText(buff);
-		if(actionTime) {
-			sprintf(buff,"%02d:%02d:%02d", actionTime->hour, actionTime->minute, actionTime->second);
-		} else if(executedFlag){
-			sprintf(buff,"%d%%", *executedFlag);
-		}
-		LCD_GoTo(0,1);
-		LCD_WriteText(buff);
+	*/
+}
 
+/*************************************************************************
+ Function: menuItem()
+ Purpose: Print text, update global time and clear flags menu and RTC flags
+ Input:	Two rows of text as max 16 char arrays (each one)
+ **************************************************************************/
+void menuItem(char *row1, char *row2) {
+	lockMainScreen = 1;
+
+	if(	(INPUT_MODIFIED_CHECK) ||
+		(SEC_CHANGED_CHECK)) {
+		printSimpleScreen(row1, row2);
+		INPUT_MODIFIED_CLEAR;
 		SEC_CHANGED_CLEAR;
 		global.second = second;
 		timeDivision(&global);
 	}
 }
-
-/*************************************************************************
- Function: incrDcr()
- Purpose:  Incrementing and/ or decrementing time or value
- Input:    Struct with adding and subtracting buttons parameters
- 	 	   and struct with time to be set
- Returns:  Set if time got changed
- **************************************************************************/
-uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *val, time *tmp) {
-	static uint8_t longPress = 0;
-	static uint8_t shorterDelay = 0;
-	uint8_t opPerformed = 0;
-
-	register uint8_t addPressed;
-
-	addPressed = addBtn ? (*addBtn->K_PIN & addBtn->key_mask) : 1;
-	register uint8_t subtrPressed;
-	subtrPressed = subtrBtn ? (*subtrBtn->K_PIN & subtrBtn->key_mask) : 1;
-
-	if (!(addPressed && subtrPressed)) {
-		uint8_t temporaryVal = 1;
-		opPerformed = 1;
-		if (longPress > 30) {
-			temporaryVal += 60;
-		} else if (longPress > 15) {
-			temporaryVal += 30;
-		} else if (longPress > 0) {
-			temporaryVal += 3;
-		}
-
-		if(tmp && !addPressed) {
-			if(temporaryVal >= 60) {
-				tmp->hour ++;
-			} else {
-				tmp->minute += temporaryVal;
-			}
-			timeDivision(tmp);
-		} else if(tmp && !subtrPressed) {
-			if(temporaryVal < 60) {
-				tmp->minute -= temporaryVal;
-			}
-			if(tmp->minute > 59) {
-				tmp->minute = 59;
-				tmp->hour --;
-				if(tmp->hour > 59) {
-					tmp->hour = 23;
-				}
-			}
-			timeDivision(tmp);
-		} else if(val && !addPressed) {
-			*val += temporaryVal;
-		} else if(val && !subtrPressed) {
-			*val -= temporaryVal;
-		}
-
-		if(!shorterDelay) {
-			_delay_ms(120);
-		}
-		_delay_ms(120);
-		if (!(addPressed && subtrPressed)) {
-			shorterDelay = 1;
-			if (longPress <= 26) {
-				longPress++;
-			}
-		}
-		SEC_CHANGED_SET;
-	} else {
-		longPress = 0;
-		shorterDelay = 0;
-	}
-
-	if(!opPerformed) {
-		return 0;
-	} else {
-		return 1;
-	}
-}
-

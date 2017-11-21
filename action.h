@@ -6,14 +6,27 @@
  Description :
  ============================================================================
  */
-#ifndef ACTION_H_
-#define ACTION_H_
+#ifndef ACTION_H
+#define ACTION_H
 
 #include "main.h"
+
+// Outputs definitions
+#define RELAY_INIT 		DDRC |= (1<<PC0)
+#define RELAY_TOGGLE	PORTC ^= (1<<PC0)
+#define RELAY_ON    	PORTC &= ~(1<<PC0)
+#define RELAY_OFF   	PORTC |= (1<<PC0)
+
+#define ALARM_INIT		 DDRC |= (1<<PC1)	// TODO change it in main from OUTPUT_PIN_A111_INIT;
+#define ALARM_TOGGLE	PORTC ^= (1<<PC1)
+#define ALARM_ON    	PORTC &= ~(1<<PC1)
+#define ALARM_OFF   	PORTC |= (1<<PC1)
+
 
 uint8_t setTimerFlag;
 uint8_t executedFlag;
 uint8_t alarmActive;
+volatile uint8_t enbleSrvceMode;
 
 uint8_t lockMainScreen;
 
@@ -69,20 +82,22 @@ void uartWriteWaterflow(uint32_t perMinute, uint32_t accumulated);
 
 void uartWriteSensorData(TEMP *temperature, uint8_t light, uint8_t moistSenCount, uint8_t *moistPercent, uint32_t perMinute, uint32_t accumulated);
 
-/** @brief
- *  @param
- *  @param
+/** @brief	Print text, update global time and clear flags menu and RTC flags
+ *  @param  *row1	: buffer with text coded in ASCII to be displayed at first row of LCD
+ *  @param  *row2	: buffer with text coded in ASCII to be displayed at second row of LCD
+ *  @return	None
  */
-void menuItem(uint8_t *executedFlag, time *currentTime, tButton * btn,  char *buff);
+void menuItem(char *row1, char *row2);
 
-/** @brief  Setting time as 24h format by user
- * 	@param  *addBtn	:	Struct consisting of add button parameters or NULL
- *  @param  *subtrBtn:	Struct consisting of subtract button parameters or NULLL
- *  @param  *val	:	Struct consisting of time to be set or NULL
- *  @param	*tmp	:	Variable to be incremented or NULL
- *  @return Set if time got changed, and modify time values
- *  @notice	val and tmp are interchangable
+/** @brief	Print text, update global time and clear flags menu and RTC flags
+ *  @param  None
+ *  @return	None
  */
-uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *val, time *tmp);
+void serviceModeEntry(void);
+
+
+
+void relToggle(void);
+void alarmToggle(void);
 
 #endif

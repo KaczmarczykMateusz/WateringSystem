@@ -109,4 +109,11 @@ void LCD_Home(void);
 // @brief Initialise HD44780 driver based display
 void LCD_Initalize(void);
 
+/** @brief	Prints two simple rows with text (2x16) at the LCD from left to right
+ *  @param  *row1	: buffer with text coded in ASCII to be displayed at first row of LCD
+ *  @param  *row2	: buffer with text coded in ASCII to be displayed at second row of LCD
+ *  @return	: None
+ */
+void printSimpleScreen(char *row1, char *row2);
+
 #endif
