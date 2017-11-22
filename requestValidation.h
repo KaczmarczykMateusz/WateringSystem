@@ -1,11 +1,9 @@
-
 /*
  ============================================================================
- Name        : requestValidation.h
- Author      : Mateusz Kaczmarczyk
- Version     :
- Description :
-			   Decision taking functions for inteligent watering system project
+ Name		: requestValidation.h
+ Author		: Mateusz Kaczmarczyk
+ Version	:
+ Description: Decision-making functions for smart watering system
  ============================================================================
  */
 #ifndef REQUEST_VALIDATION_H
@@ -26,7 +24,7 @@ typedef enum _startAction {
 	START_COUNTER	=	TURN_ON_TIME | WAIT_TO_CONFIRM	//@brief: Starts passed time counter
 }processValidation;
 
-//@brief:  Holds conditional switch condition variables
+//@brief: Holds conditional switch condition variables
 typedef struct _condSwitch {
 	uint8_t moistureMin;	//@brief: Minimum moisture at which watering process can be triggered
 	uint16_t presetWf ;		//@brief: Water volume which is to be applied during watering process
@@ -43,53 +41,60 @@ typedef struct _value {
 }value;
 
 
-/** @brief:	Assign values from sensors to storage variables
- * 	@param:	*_value	:	Structure holding all real sensor values
- *  @param: moisture:	actual moisture as percents
- *  @param: temp	:	actual temperature multiplied by 100
- *  @param: wfVolume: 	actual water flow volume measured from
- *  					last starting of the pump as centilitres (1cl = 1/100l)
- *  @param: bright: 	actual brightness as percents
+/**	@brief:	Assign values from sensors to storage variables
+ *	@param:	*_value	: Structure holding all real sensor values
+ *	@param: moisture: actual moisture as percents
+ *	@param: temp	: actual temperature multiplied by 100
+ *	@param: wfVolume: actual water flow volume measured from
+ *					  last starting of the pump as centilitres (1cl = 1/100l)
+ *	@param: bright	:  actual brightness as percents
  */
 void updateSensorValues(value (*), uint8_t, uint32_t, uint16_t, uint8_t);
 
-/** @brief:	Updates values which are for exclusive usage of conditional switch to determine whether and when
- * 			to start/ end action (default: watering)
- * 	@param:	*_condSwitch :	Structure holding all condition values for conditional switch
- * 	@param:	turnOnTime	:	Time (converted to seconds) when to start validation of function execution
- * 	@param:	activeTime	:	Time window (converted to seconds) to perform validation
- * 	@param:	moistureMin	:	Minimum moisture to enable start of watering process passed as percent
- * 	@param:	presetWf	:	Water to be used for one watering as centilitres (1cl = 1/100l)
- * 	@note:  resolution	:	Minutes
- * 							Ensure to call this function after every change of conditions
- * 	@see:	conditionalSwitch()
+/**
+ *
+ * 	@brief:	Updates values which are for exclusive usage of conditional switch to determine whether and when
+ *			to start/ end action (default: watering)
+ * @param:	*_condSwitch: Structure holding all condition values for conditional switch
+ * @param:	turnOnTime	: Time (converted to seconds) when to start validation of function execution
+ * @param:	activeTime	: Time window (converted to seconds) to perform validation
+ * @param:	moistureMin	: Minimum moisture to enable start of watering process passed as percent
+ * @param:	presetWf	: Water to be used for one watering as centilitres (1cl = 1/100l)
+ * @note:	resolution	: Minutes
+ *						  Ensure to call this function after every change of conditions
+ *  @see:	conditionalSwitch()
 */
 void updateConditionalSwitch(condSwitch (*),uint32_t turnOnTime, uint32_t activeTime, uint8_t moistureMin, uint16_t presetWf);
 
-/** @brief: Prototype of starting action callback function to be replaced with executing function
- *	@see:	used in conditionalSwitch()*/
+/**
+ * @brief:	Prototype of starting action callback function to be replaced with executing function
+ * @see:	used in conditionalSwitch()*/
 void (*startCallback)(void);
 
-/** @brief: Prototype of ending action callback function to be replaced with executing function
- *	@see:	used in conditionalSwitch()*/
+/**
+ * @brief:	Prototype of ending action callback function to be replaced with executing function
+ * @see:	used in conditionalSwitch()*/
 void (*endCallback)(void);
 
-/** @brief:	Registers callback to function triggered by conditional switch
+/**
+ * @brief:	Registers callback to function triggered by conditional switch
  * 			(by default: water pump relay ON)
- *  @param:	Pointer to function with no parameters neither return
+ * @param:	Pointer to function with no parameters neither return
  */
 void registerStartActionCallback(void (*endAction)(void));
 
-/** @brief:	Registers callback to function triggered by conditional switch
- * 			(by default: water pump relay OFF)
- *  @param:	Pointer to function with no parameters neither return
+/**
+ * @brief: Registers callback to function triggered by conditional switch
+ * 		    by default: water pump relay OFF)
+ * @param: Pointer to function with no parameters neither return
  */
 void registerEndActionCallback(void (*endAction)(void));
 
-/** @brief:	Main function for starting and terminating action
- * 			(by default watering) checking whether all conditions occurred
- *  @param	Current global time as seconds
- *  @param	Flag terminating action before it expires
+/**
+ * @brief: Main function for starting and terminating action
+ * 		    (by default watering) checking whether all conditions occurred
+ * @param: Current global time as seconds
+ * @param: Flag terminating action before it expires
  */
 void conditionalSwitch(condSwitch *_condSwitch, value * _value, uint32_t currentTime, uint8_t *shutDown);
 
