@@ -17,7 +17,7 @@
 #include "clock.h"
 
 //	@brief Buttons masks definitions
-#define SET_BTN_MASK 	(1<<PD6)
+#define SET_BTN_MASK 	(1<<PD3)
 #define SELECT_BTN_MASK (1<<PD5)
 #define STOP_BTN_MASK 	(1<<PD4)
 

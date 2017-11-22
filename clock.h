@@ -66,6 +66,8 @@ void timeDivision(time *tmp);
  */
 uint32_t timeToSeconds(time *tmp);
 
+uint32_t timeToSecondsAccurate(time *tmp);
+
 /** @brief  Feature enables user to set his own timer
  *  where he specifies turning ON and OFF time and actions
  *  triggered at indicated time

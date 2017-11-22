@@ -57,7 +57,34 @@ int main(void)
 	value val;
 
 	uint8_t temporaryLockFlag = 1;
+
+	uint32_t wfStartTime = 0; // TODO: concern uint16_t
+	uint32_t wfVolLive = 0;
+	uint32_t wfVolStore = 0;
+
+	wfStatus = 0;
+	wfStatus &= WF_COUNT_LAUNCH;
+
 	while (1) {
+#if 0 //Enable when working
+		if(	wfStatus & WF_COUNT_RUNNING) {
+			wfStartTime  = timeToSecondsAccurate(&global);
+			wfStatus |= WF_CAPTURE_TIME;
+			wfCount = 4;
+		}
+		if(wfStatus & WF_CAPTURE_TIME) {
+			wfCount = 6;
+			if(wfStatus & WF_COUNT_RUNNING) {
+				wfVolLive = (timeToSecondsAccurate(&global) - wfStartTime) * (measureWF() / 60.0f);
+				wfCount = 50;
+			} else  {
+				wfStatus &= ~WF_CAPTURE_TIME;
+				wfVolStore += wfVolLive;
+				wfVolLive = 0;
+
+			}
+		}
+#endif
 		if(!lockMainScreen) {
 			resetSecond = incrDcr(&setBtn, NULL, NULL, 0, &global) ? 1 : 0;
 			keyPress(&stopBtn, turnAlarmOff);	// @brief: stops alarm or watering ONLY while it's running
@@ -112,6 +139,15 @@ int main(void)
 			uartWriteLight(lightStrength);
 			uartPuts("\n\r");
 			uartWriteMoisture(MOIST_SENSORS_NUMBER, moisture);
+
+			uartPuts("\n\rWater flow live:");
+			sendInteger(wfCount);
+
+			uartPuts("\n\rWater flow accumulated:");
+			char abuf[16];
+			sprintf(abuf, "%u", measureWF());
+			uartPuts(abuf);
+			wfSensToggle(1);
 
 			if(!lockMainScreen) {
 				sprintf(printLCDBuffer,"%02d:%02d:%02d %d%%",global.hour, global.minute, global.second, lightStrength );

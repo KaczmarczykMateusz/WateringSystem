@@ -74,6 +74,10 @@ uint32_t timeToSeconds(time *tmp){
 	return (uint32_t)((uint32_t)((tmp->hour * 60) + tmp->minute) * 60);
 }
 
+uint32_t timeToSecondsAccurate(time *tmp){
+	return (uint32_t)((uint32_t)(((tmp->hour * 60) + tmp->minute) * 60) + tmp->second);
+}
+
 /*************************************************************************
  Function: userTimer()
  Purpose:  lets user to set action which should be taken at indicated time
