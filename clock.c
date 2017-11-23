@@ -68,21 +68,28 @@ void timeDivision(time *tmp) {
  Function: timeToSeconds()
  Purpose:  Transform time HH:MM into seconds
  Input:    Struct with time to be transformed
- Returns:  none
+ Notice Resolution: minutes
  **************************************************************************/
 uint32_t timeToSeconds(time *tmp){
 	return (uint32_t)((uint32_t)((tmp->hour * 60) + tmp->minute) * 60);
 }
 
+/*************************************************************************
+ Function: timeToSecondsAccurate()
+ Purpose:  Transform time HH:MM:SS into seconds
+ Input:    Struct with time to be transformed
+ Notice Resolution: seconds
+ **************************************************************************/
 uint32_t timeToSecondsAccurate(time *tmp){
 	return (uint32_t)((uint32_t)(((tmp->hour * 60) + tmp->minute) * 60) + tmp->second);
 }
 
 /*************************************************************************
- Function: userTimer()
- Purpose:  lets user to set action which should be taken at indicated time
- Input:
- Returns:  none
+ Function:	userTimer()
+ Purpose:	lets user to set action which should be taken at indicated time
+ Input:		Time to start, time from start till the end, start and finish
+ 	 	 	action void functions, global current time
+ Notice:	Time resolution: minutes
  **************************************************************************/
 void userTimer(uint32_t turnOnTime, uint32_t activeTime, void (*actionON)(void), void (*actionOFF)(void), uint32_t currentTime) {
 	static uint8_t checkPreset = 0;
@@ -97,7 +104,6 @@ void userTimer(uint32_t turnOnTime, uint32_t activeTime, void (*actionON)(void),
 	if(currentTime > turnOnTime){
 		passedTime = currentTime - turnOnTime;
 	}
-
 
 	if(passedTime == activeTime) {
 		if(checkPreset == 1) {
