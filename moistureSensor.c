@@ -117,7 +117,9 @@ uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8
 
 		case 0:
 			temporaryBoundry = (moistSensMinOut * adcPercent) / 10;
+#if 0
 			incrDcr(addBtn, subtrBtn, &temporaryBoundry, 100, NULL);
+#endif
 			sprintf(buff1, "SET MIN: %d%%", temporaryBoundry);
 			sprintf(bufferLCD, "Read: %d%% ->Next", actualMoist);
 			menuItem(buff1, bufferLCD);
@@ -126,7 +128,9 @@ uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8
 
 		case 1:
 			temporaryBoundry = (moistSensMaxOut * adcPercent) / 10;
+#if 0
 			incrDcr(addBtn, subtrBtn, &temporaryBoundry, 100, NULL);
+#endif
 			sprintf(buff1, "SET MAX: %d%%", temporaryBoundry);
 			sprintf(bufferLCD, "Read: %d%% ->Next", actualMoist);
 			menuItem(buff1, bufferLCD);

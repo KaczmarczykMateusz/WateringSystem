@@ -8,6 +8,7 @@
  */
 #include <stdio.h>
 #include "requestValidation.h"
+#include "action.h"
 
 /*************************************************************************
  Function:	updateSensorValues()
@@ -51,8 +52,8 @@ void updateConditionalSwitch(condSwitch *_condSwitch, uint32_t turnOnTime, uint3
  Input:		Void function without return
  See:		conditionalSwitch()
  **************************************************************************/
-void registerStartActionCallback(void (*processValidation)(void)) {
-	startCallback = processValidation;
+void registerStartActionCallback(void (*startAction)(void)) {
+	startCallback = startAction;
 }
 
 /*************************************************************************
@@ -77,11 +78,13 @@ void conditionalSwitch(condSwitch *_condSwitch, value * _value, uint32_t current
 	static processValidation action = TERMINATE;
 	static uint32_t savedTemperature = 0;
 	uint32_t passedTime = 0;
+#if 0
 	if(*shutDown == 1) {
 		action = TERMINATE;
 		*shutDown = 0;
 	}
-	if(action & START_COUNTER) {
+#endif
+	if((action & TURN_ON_TIME) || (action & WAIT_TO_CONFIRM)) {
 		if(currentTime >= _condSwitch->turnOnTime){
 			passedTime = currentTime - _condSwitch->turnOnTime;
 
@@ -131,17 +134,16 @@ void conditionalSwitch(condSwitch *_condSwitch, value * _value, uint32_t current
 			action = EXECUTE;
 		}
 		LCD_GoTo(9, 1);
-		LCD_WriteText("-WAIT");
+		LCD_WriteText("-WAIT TO CNFRM");
 	break;
 
 	/* purpose: Execute action */
 	case EXECUTE:
 		if(startCallback) {
 			startCallback();
-			action = IN_PROGRESS;
-		} else {
-			action = WAIT;
 		}
+		action = IN_PROGRESS;
+
 		LCD_GoTo(8, 1);
 		LCD_WriteText("-EXECUTE");
 	break;
@@ -161,6 +163,7 @@ void conditionalSwitch(condSwitch *_condSwitch, value * _value, uint32_t current
 		if(endCallback) {
 			endCallback();
 		}
+
 		action = WAIT;
 		LCD_GoTo(5, 1);
 		LCD_WriteText("-TERMINATE");

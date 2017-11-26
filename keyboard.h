@@ -90,7 +90,7 @@ void keyPushUp(tButton * btn, void (*action)(void));
  *  @return Set if time got changed, and modify time values
  *  @notice	val and tmp are interchangable
  */
-uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t maxVal, time *modTime);
+uint8_t incrDcr(tButton *addBtn, tButton *subtBtn, uint32_t *modVal, uint32_t maxVal, time *modTime);
 
 
 

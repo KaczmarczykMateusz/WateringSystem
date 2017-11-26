@@ -45,4 +45,11 @@ uint8_t lightStrength;
 uint8_t moisture[3];
 
 
+/**
+ * @brief:	Initialise all variables and peripherals
+ * 			need for work of the system
+ */
+void systemInit(void);
+
+
 #endif

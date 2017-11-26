@@ -9,19 +9,18 @@
 #include "main.h"
 #include <math.h>
 
-int main(void)
-{
-	enbleSrvceMode = 0;
-	uint8_t minMoist;
-	ALARM_INIT;
-	RELAY_INIT;
-	ALARM_ON;
+int main(void) {
+	uint8_t minMoist = 0;
+	uint8_t dsFlag = 0;
+	uint8_t temporaryLockFlag = 1;
 
-//	powerSaveInit();
-	rt_clock_init();
-	LCD_Initalize();
-	adcInit();
+	uint32_t wfVolAccu = 0;
+	uint32_t wfTemp = 0;
+	uint32_t wfDoseVol = 0;
 
+	uint8_t resetSecond = 0;
+ 	uint32_t passAsLong = 0;
+//TODO: implement macro defining button port letter (eg. "A", or "B")
 	tButton setBtn = btnInit(&DDRD, &PORTD, &PIND, SET_BTN_MASK);
 	tButton selectBtn = btnInit(&DDRD, &PORTD, &PIND, SELECT_BTN_MASK);
 	tButton stopBtn = btnInit(&DDRD, &PORTD, &PIND, STOP_BTN_MASK);
@@ -37,35 +36,16 @@ int main(void)
 	moist[1].ref_v = 234;
 	moist[1].ref_adc = 2100;
 
-	uartInit( UART_BAUD_SELECT(115200, 16000000L) );
-	uartFlush();
-	relOFF();
-	outOFF();
-
-	registerStartActionCallback(turnAlarmOn);
-	registerEndActionCallback(turnAlarmOff);
-
-	uint8_t dsFlag = 0;
-	MIN_CHANGED_SET;
-	lockMainScreen = 0;
-	alarmActive = 0;
-	uint8_t resetSecond = 0;
-	minMoist = 0;
-	sensorNumber  = 0;
-
 	condSwitch switchConditions; // todo: throw it out from header file and define here
 	value val;
 
-	uint8_t temporaryLockFlag = 1;
+	systemInit();
 
-	uint32_t wfVolAccu = 0;
-
-	wfStatus = 0;
-	uint32_t wfTemp = 0;
 	while (1) {
 		if(!lockMainScreen) {
-			resetSecond = incrDcr(&setBtn, NULL, NULL, 0, &global) ? 1 : 0;
-			keyPress(&stopBtn, turnAlarmOff);	// @brief: stops alarm or watering ONLY while it's running
+			resetSecond = incrDcr(&setBtn, &stopBtn, 0, 0, &global) ? 1 : 0;
+			// @brief: stops alarm or watering ONLY while it's running
+	//		keyPress(&stopBtn, 0);
 		}
 
 		keyLongPress(&selectBtn, timerSetModeNextStep, serviceModeEntry);
@@ -82,9 +62,15 @@ int main(void)
 
 	        if(MIN_CHANGED_CHECK) {
 	        	voltAdc(adcOversample(0x07, 3), &light); // replace this name with adcConvert(adcOversample(0x07, 3), &light);
-	        	lightStrength = lightSensor(&light); // TODO: implement pwrUp and pwrDown even though we can check brightness constantly there is no need so better save power
 
-	//        	userTimer(timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), turnAlarmOn, activeTime, timeToSeconds(&global)); // calls simple alarm
+// TODO: implement pwrUp and pwrDown even though we can check brightness constantly there is no need so better save power
+	        	lightStrength = lightSensor(&light);
+
+//TODO: remove it from current project for further use in other
+//	        	userTimer(timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), turnAlarmOn, activeTime, timeToSeconds(&global)); // calls simple alarm
+
+	        	//Keep minute flag ON until moisture sensors update
+//TODO: add INPUT_WAIT_MOIST
 	        	if(!moistCheckStart(&temporaryLockFlag, &sensorNumber)) {
 	        		MIN_CHANGED_CLEAR;
 	        	}
@@ -143,51 +129,101 @@ int main(void)
 				LCD_GoTo(0,1);
 				LCD_WriteText(currTemp);
 			}
+
 	        outAlarm();
+	        //turnAlarmOff();
 // TODO take the lowest or avarage moisture and pass it to conditional switch
-	        updateConditionalSwitch(&switchConditions, timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), minMoist, 0);
-			updateSensorValues(&val, moisture[0], temp.tempMultip, 0, lightStrength);
+// TODO: Pass wfDoseVol as [dl]
+			wfDoseVol *= 10; // Convert [dl] to [cl];
+	        updateConditionalSwitch(&switchConditions, timeToSeconds(&turnOnTime), timeToSeconds(&activeTime), minMoist, wfDoseVol);
+	        //	  updateConditionalSwitch(&switchConditions, 60, 120, 10, 100);
+			wfDoseVol /= 10; // Convert back [cl] to [dl];
+			updateSensorValues(&val, moisture[0], temp.tempMultip, wfVolAccu, lightStrength);
 			conditionalSwitch(&switchConditions, &val, timeToSeconds(&global), &alarmActive);// TODO:implement enabling/ disabling alarm
 
- //       	if(!temporaryLockFlag) {
-        		moisture[sensorNumber] = moistCheckResult(temporaryLockFlag, moist ,&sensorNumber);
-   //     		temporaryLockFlag = 1;
-    //    	}
+			moisture[sensorNumber] = moistCheckResult(temporaryLockFlag, moist ,&sensorNumber);
         }
 
 
-//	****** MENU *******
+//	****************** MENU ******************	//
 		switch(setTimerFlag) {
 
 		case 1:
-			incrDcr(&setBtn, &stopBtn, NULL, 0, &turnOnTime);
+			incrDcr(&setBtn, &stopBtn, 0, 0, &turnOnTime);
 			sprintf(printLCDBuffer, "Set timer ON");
 			sprintf(buff1, "%02d:%02d:%02d", turnOnTime.hour, turnOnTime.minute, turnOnTime.second);
 			menuItem(printLCDBuffer, buff1);
 		break;
 
 		case 2:
-			incrDcr(&setBtn, &stopBtn, NULL, 0, &activeTime);
+			incrDcr(&setBtn, &stopBtn, 0, 0, &activeTime);
 			sprintf(printLCDBuffer, "Set period");
 			sprintf(buff1, "%02d:%02d:%02d", activeTime.hour, activeTime.minute, activeTime.second);
 			menuItem(printLCDBuffer, buff1);
 		break;
 
 		case 3:
-			incrDcr(&setBtn, &stopBtn, &minMoist, 100, NULL);
+			passAsLong = (uint32_t)minMoist;
+			incrDcr(&setBtn, &stopBtn, &passAsLong, 100, 0);
+			minMoist = (uint8_t)passAsLong;
 			sprintf(printLCDBuffer, "Minimum moisture");
 			sprintf(buff1, "%d%%", minMoist);
 			menuItem(printLCDBuffer, buff1);
 		break;
 
 		case 4:
+			incrDcr(&setBtn, &stopBtn, &wfDoseVol, 10000, 0);	//Maximum 1000 liters as decilitre
+			sprintf(printLCDBuffer, "Water dose vol.");
+// TODO: Display wfDoseVol as [dl]
+			sprintf(buff1, "%ld [dl]", wfDoseVol);
+			menuItem(printLCDBuffer, buff1);
+			registerStartActionCallback(turnAlarmOn);
+			registerEndActionCallback(turnAlarmOff);
+			//registerStartActionCallback(relON);
+			//registerStartActionCallback(relOFF);
+
+		break;
+
+		case 5:
 			setTimerFlag = 0;
 			lockMainScreen = 0;
 		break;
 
 		default:
 			setTimerFlag = 0;
+			lockMainScreen = 0;
 		}
 //      goToSleep();
 	}
+}
+
+/*************************************************************************
+ Function: 	systemInit()
+ Purpose:	Initialise all variables and peripherals
+ 	 	 	need for work of the system
+ **************************************************************************/
+void systemInit(void) {
+	enbleSrvceMode = 0;
+	ALARM_INIT;
+	RELAY_INIT;
+
+	ALARM_OFF;
+	relOFF();
+	outOFF();
+//	RELAY_ON;
+
+//	powerSaveInit();
+	rt_clock_init();
+	LCD_Initalize();
+	adcInit();
+
+	uartInit( UART_BAUD_SELECT(115200, 16000000L) );
+	uartFlush();
+
+	MIN_CHANGED_SET;
+	lockMainScreen = 0;
+	turnAlarmOff();
+
+	sensorNumber  = 0;
+	wfStatus = 0;
 }

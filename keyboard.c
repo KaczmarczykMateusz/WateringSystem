@@ -103,18 +103,24 @@ void keyPushUp(tButton * btn, void (*action)(void)) {
  	 	   and struct with time to be set
  Returns:  Set if time got changed
  **************************************************************************/
-uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t maxVal, time *modTime) {
+uint8_t incrDcr(tButton *addBtn, tButton *subtBtn, uint32_t *modVal, uint32_t maxVal, time *modTime) {
 	static uint8_t longPress = 0;
 	static uint8_t shorterDelay = 0;
 	uint8_t opPerformed = 0;
 
+
+	register uint8_t addPressed = !(*addBtn->K_PIN & addBtn->key_mask);
+	register uint8_t subtPressed = !(*subtBtn->K_PIN & subtBtn->key_mask);
+
+#if 0
 	register uint8_t addPressed;
-
 	addPressed = addBtn ? (*addBtn->K_PIN & addBtn->key_mask) : 1;
-	register uint8_t subtrPressed;
-	subtrPressed = subtrBtn ? (*subtrBtn->K_PIN & subtrBtn->key_mask) : 1;
-
-	if (!(addPressed && subtrPressed)) {
+	register uint8_t subtPressed;
+	subtPressed = subtrBtn ? (*subtrBtn->K_PIN & subtrBtn->key_mask) : 1;
+#endif
+	if (addPressed || subtPressed) { //TODO: subtracting part of function disabled because of undefined behavior
+	// addPressed can override subtracting action without issues but they can't coexist even if you change PIN and port of it
+		//	if (addPressed) {
 		uint8_t temporaryVal = 1;
 		opPerformed = 1;
 		if (longPress > 30) {
@@ -125,14 +131,14 @@ uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t max
 			temporaryVal += 3;
 		}
 
-		if(modTime && !addPressed) {
+		if(modTime && addPressed) {
 			if(temporaryVal >= 60) {
 				modTime->hour ++;
 			} else {
 				modTime->minute += temporaryVal;
 			}
 			timeDivision(modTime);
-		} else if(modTime && !subtrPressed) {
+		} else if(modTime && subtPressed) {
 			if(temporaryVal < 60) {
 				modTime->minute -= temporaryVal;
 			}
@@ -144,9 +150,9 @@ uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t max
 				}
 			}
 			timeDivision(modTime);
-		} else if(modVal && !addPressed) {
+		} else if(modVal && addPressed) {
 			*modVal += temporaryVal;
-		} else if(modVal && !subtrPressed) {
+		} else if(modVal && subtPressed) {
 			*modVal -= temporaryVal;
 		}
 		if(maxVal == 1) {			//In case if we use toggle mode
@@ -162,7 +168,7 @@ uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t max
 			_delay_ms(120);
 		}
 		_delay_ms(120);
-		if (!(addPressed && subtrPressed)) {
+		if (addPressed || subtPressed) {
 			shorterDelay = 1;
 			if (longPress <= 26) {
 				longPress++;

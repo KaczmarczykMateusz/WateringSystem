@@ -20,8 +20,8 @@ typedef enum _startAction {
 	WAIT_TO_CONFIRM	=	(1UL << 3),	//@brief: Wait for confirmation from moisture sensor
 	EXECUTE			=	(1UL << 4),	//@brief: Execute action
 	IN_PROGRESS		=	(1UL << 5),	//@brief: Wait for condition terminating action
-	TERMINATE		=	(1UL << 6),	//@brief: Terminates action
-	START_COUNTER	=	TURN_ON_TIME | WAIT_TO_CONFIRM	//@brief: Starts passed time counter
+	TERMINATE		=	(1UL << 6)	//@brief: Terminates action
+//	START_COUNTER	=	TURN_ON_TIME | WAIT_TO_CONFIRM	//@brief: Starts passed time counter
 }processValidation;
 
 //@brief: Holds conditional switch condition variables
@@ -81,7 +81,7 @@ void (*endCallback)(void);
  * 			(by default: water pump relay ON)
  * @param:	Pointer to function with no parameters neither return
  */
-void registerStartActionCallback(void (*endAction)(void));
+void registerStartActionCallback(void (*startAction)(void));
 
 /**
  * @brief: Registers callback to function triggered by conditional switch
