@@ -16,9 +16,6 @@
 
 #include "keyboard.h"
 
-//	@brief   definition ADCIN (ADC input)
-#define ADCIN PA7
-
 //  @brief  holding values  for ADC oversampling measurement
 typedef struct {
 	// @brief   set value in the middle (not precise) of measure range which can be pre-stepped down with voltage divider

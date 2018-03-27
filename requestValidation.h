@@ -98,4 +98,15 @@ void registerEndActionCallback(void (*endAction)(void));
  */
 void conditionalSwitch(condSwitch *_condSwitch, value * _value, uint32_t currentTime, uint8_t *shutDown);
 
+/**
+ * @brief:	Feature enables user to set his own timer
+ *			where he specifies turning ON and OFF time and actions
+ *			triggered at indicated time
+ * @param:	currentTime		: Current time as seconds
+ * @param:	turnOnTime		: Time when to start executing action as seconds
+ * @param:	activeTime		: Time to keep execution of "alarm" task ON as seconds
+ * @return:	determine system state (work/ready)
+ */
+uint8_t timerSwitch(uint32_t currentTime, uint32_t turnOnTime, uint32_t activeTime);
+
 #endif

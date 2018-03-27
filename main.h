@@ -30,6 +30,9 @@
 #include "spi.h"
 #include "fat16.h"
 
+static const uint16_t BLINK_DELAY_FREQ = 35000;
+uint16_t blinkDelay;
+
 time global;
 time turnOnTime;
 time activeTime;
@@ -44,12 +47,41 @@ char currTemp[9];
 uint8_t lightStrength;
 uint8_t moisture[3];
 
+uint16_t blinkDelays;
+char firstRowBuffLCD[17];
+char secondRowBuffLCD[17];
+
+
+
+
+
+typedef enum {
+	READY,
+	WORK
+} status;
+
+typedef enum {
+	MINUTES,
+	LITRES
+} control;
+
+status systemStatus;
+control controlFactor;
+
+void setClockMode(void);
+void setTimeOnMode(void);
+void setTimerMode(void);
+void setVolumeMode(void);
+void setCtrlMode(void);
+void setHumidityMode(void);
+void exitServiceMode(void);
 
 /**
  * @brief:	Initialise all variables and peripherals
  * 			need for work of the system
  */
 void systemInit(void);
-
+void printMainScreen(void);
+void controlMode(void);
 
 #endif

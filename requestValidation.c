@@ -173,3 +173,36 @@ void conditionalSwitch(condSwitch *_condSwitch, value * _value, uint32_t current
 		action = TERMINATE;
 	}
 }
+
+/*************************************************************************
+ Function:	timerSwitch()
+ Purpose:	lets user to set action which should be taken at indicated time
+ Input:		Global current time, Time to start, time from start till the end, start and finish
+ Notice:	Time resolution: minutes
+ **************************************************************************/
+uint8_t timerSwitch(uint32_t currentTime, uint32_t turnOnTime, uint32_t activeTime) {
+	if(!startCallback || !endCallback) {
+		return 0;
+	}
+
+	static uint8_t isOn = 0;
+	if( (currentTime == turnOnTime) && !isOn ) {
+		startCallback();
+		isOn= 1;
+	} else if(!isOn) {
+		return 0;
+	}
+
+	static uint32_t passedTime = 0;
+	if(currentTime > turnOnTime) {
+		passedTime = currentTime - turnOnTime;
+	} else if(isOn) {
+		passedTime = ( (24*60)-turnOnTime ) + currentTime;
+	}
+
+	if( (passedTime == activeTime) && isOn ) {
+		endCallback();
+		isOn = 0;
+	}
+	return isOn;
+}

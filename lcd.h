@@ -24,15 +24,15 @@ Description : Should work on other AVR too (Atmega8 and 32 tested)
 
 #define LCD_DB4_DIR		DDRB
 #define LCD_DB4_PORT	PORTB
-#define LCD_DB4			(1 << PB4)
+#define LCD_DB4			(1 << PB2)
 
 #define LCD_DB5_DIR		DDRB
 #define LCD_DB5_PORT	PORTB
-#define LCD_DB5			(1 << PB2)
+#define LCD_DB5			(1 << PB3)
 
 #define LCD_DB6_DIR		DDRB
 #define LCD_DB6_PORT	PORTB
-#define LCD_DB6			(1 << PB3)
+#define LCD_DB6			(1 << PB4)
 
 #define LCD_DB7_DIR		DDRC
 #define LCD_DB7_PORT	PORTC

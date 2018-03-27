@@ -26,7 +26,7 @@
 
 #define MOIST_SENSORS_NUMBER 2
 
-#define MOIST_SENSOR_POWER_MASK	(1 << 6)
+#define MOIST_SENSOR_POWER_MASK	(1 << 0)
 
 uint8_t sensorNumber;
 
@@ -54,13 +54,11 @@ void moistSensPwrDwn(volatile uint8_t *S_DDR, volatile uint8_t *S_PORT, uint8_t 
 void moistSensPwrUp(volatile uint8_t *S_DDR, volatile uint8_t *S_PORT, uint8_t sensorMask);
 
 /** @brief	Powers up moisture sensors in order to prepare them to conversion by moistCheckResult()
- *  @param  *S_DDR		: Address of DDR of powering moisture sensors
- *  @param  *S_PORT		: Address of PORT of powering moisture sensors
  *  @param  sensorMask	: Bit mask of PIN powering moisture sensors
  *  @return	: Flag confirming that there are no more sensors to check
  *  @see	: moistCheckStart()
  */
-uint8_t moistCheckStart(uint8_t *flag, uint8_t *sensNo);
+uint8_t moistCheckStart(uint8_t sensNo);
 
 /** @brief	Process ADC conversion from start till the end and convert result into percent via moistureSensor()
  * 			All happens only if sensors are successfully powered by moistCheckStart()

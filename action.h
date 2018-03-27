@@ -100,4 +100,39 @@ void serviceModeEntry(void);
 void relToggle(void);
 void alarmToggle(void);
 
+/**
+ * @brief: enter global clock setting mode
+ */
+void setClockMode(void);
+
+/**
+ * @brief: enter starting action time setting mode
+ */
+void setTimeOnMode(void);
+
+/**
+ * @brief: enter length of action (time) setting mode
+ */
+void setTimerMode(void);
+
+/**
+ * @brief: enter length of action (volume) setting mode
+ */
+void setVolumeMode(void);
+
+/**
+ * @brief: enter control setting mode (litres/minutes)
+ */
+void setCtrlMode(void);
+
+/**
+ * @brief: enter humidity control setting mode (moisture or not)
+ */
+void setHumidityMode(void);
+
+/**
+ * @brief: proceed to normal operation
+ */
+void exitServiceMode(void);
+
 #endif

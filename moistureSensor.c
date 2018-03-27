@@ -60,15 +60,15 @@ void moistSensPwrDwn(volatile uint8_t *S_DDR, volatile uint8_t *S_PORT, uint8_t 
  Input:    Number of sensor to be powered
  Returns:  Flag confirming that some of sensors is powered
  **************************************************************************/
-uint8_t moistCheckStart(uint8_t *flag, uint8_t *sensNo) {
-		moistSensPwrUp(&DDRA, &PORTA, MOIST_SENSOR_POWER_MASK);
-		if(*sensNo >= MOIST_SENSORS_NUMBER) {
-			*sensNo = 0;
-			*flag = 0;
-		} else {
-			*flag = 1;
-		}
-	return *flag;
+uint8_t moistCheckStart(uint8_t sensNo) {
+	uint8_t flag;
+	moistSensPwrUp(&DDRA, &PORTA, MOIST_SENSOR_POWER_MASK);
+	if(sensNo >= MOIST_SENSORS_NUMBER) {
+		flag = 0;
+	} else {
+		flag = 1;
+	}
+	return flag;
 }
 
 /*************************************************************************
@@ -78,9 +78,9 @@ uint8_t moistCheckStart(uint8_t *flag, uint8_t *sensNo) {
  Input:    Struct with ADC voltage parameters, number of sensor
  Returns:  Moisture as percent
  **************************************************************************/
-uint8_t moistCheckResult(uint8_t flag, TVOLT *mSens, uint8_t *sensNo) {
+uint8_t moistCheckResult(uint8_t isPowered, TVOLT *mSens, uint8_t *sensNo) {
 	uint8_t temporaryMoist = 0;
-	if(flag) {
+	if(isPowered) {
 		uint16_t adcMoist1 = adcOversample(*sensNo, 3);
 		voltAdc(adcMoist1, &mSens[*sensNo]);
 
@@ -89,6 +89,8 @@ uint8_t moistCheckResult(uint8_t flag, TVOLT *mSens, uint8_t *sensNo) {
 		// when value reaches maximum it makes moistCheckStart to disable further checks
 		if(*sensNo < MOIST_SENSORS_NUMBER) {
 			++*sensNo;
+		} else {
+			sensNo = 0;
 		}
 	}
 	moistSensPwrDwn(&DDRA, &PORTA, MOIST_SENSOR_POWER_MASK);

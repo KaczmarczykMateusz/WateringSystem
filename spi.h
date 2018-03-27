@@ -18,7 +18,7 @@
 #define SCK (1<<PB7)
 
 #define CS_DDR DDRB
-#define CS (1<<PB4)
+#define CS 1//(1<<PB4) //TODO: enable it
 #define CS_ENABLE() (PORTB &= ~CS)
 #define CS_DISABLE() (PORTB |= CS)
 
