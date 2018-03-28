@@ -51,9 +51,7 @@ uint16_t blinkDelays;
 char firstRowBuffLCD[17];
 char secondRowBuffLCD[17];
 
-
-
-
+uint8_t isBlink;
 
 typedef enum {
 	READY,
@@ -65,8 +63,14 @@ typedef enum {
 	LITRES
 } control;
 
+typedef enum {
+	MOIST_ON,
+	MOIST_OFF
+} moistureCtrl;
+
 status systemStatus;
 control controlFactor;
+moistureCtrl moistCtrl;
 
 void setClockMode(void);
 void setTimeOnMode(void);
@@ -81,7 +85,10 @@ void exitServiceMode(void);
  * 			need for work of the system
  */
 void systemInit(void);
-void printMainScreen(void);
+void printMainScreen(time turnOnClock, uint32_t activeTime, time globalClock, char* sysMoistStat, char* sysStat);
 void controlMode(void);
+
+void toggleCtrl(void);
+void toggleHumidityCtrl(void);
 
 #endif

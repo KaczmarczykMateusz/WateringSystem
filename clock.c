@@ -85,35 +85,6 @@ uint32_t timeToSecondsAccurate(time *tmp){
 }
 
 /*************************************************************************
- Function:	userTimer()
- Purpose:	lets user to set action which should be taken at indicated time
- Input:		Time to start, time from start till the end, start and finish
- 	 	 	action void functions, global current time
- Notice:	Time resolution: minutes
- **************************************************************************/
-void userTimer(uint32_t turnOnTime, uint32_t activeTime, void (*actionON)(void), void (*actionOFF)(void), uint32_t currentTime) {
-	static uint8_t checkPreset = 0;
-	if(currentTime == turnOnTime) {
-		if(checkPreset == 0) {
-			checkPreset= 1;
-			if(actionON) actionON();
-		}
-	}
-	uint32_t passedTime = 0;
-
-	if(currentTime > turnOnTime){
-		passedTime = currentTime - turnOnTime;
-	}
-
-	if(passedTime == activeTime) {
-		if(checkPreset == 1) {
-			checkPreset = 0;
-			if(actionOFF) actionOFF();
-		}
-	}
-}
-
-/*************************************************************************
  Function: getCurrentTime()
  Purpose:  Transform time from passed struct into seconds
  Input:    Time hours, minutes and seconds into seconds
@@ -146,4 +117,13 @@ void goToSleep(void) {
 	sleep_enable();
 	sleep_mode();
 	sleep_disable();
+}
+
+/*************************************************************************
+ Function: timeToMinutes()
+ Purpose:  Transform time HH:MM into minutes
+ Input:    Struct with time to be transformed
+ **************************************************************************/
+uint32_t timeToMinutes(time *tmp) {
+	return (uint32_t)((uint32_t)(tmp->hour * 60) + tmp->minute);
 }

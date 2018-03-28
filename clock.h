@@ -103,19 +103,6 @@ uint32_t timeToSeconds(time *tmp);
 uint32_t timeToSecondsAccurate(time *tmp);
 
 /**
- * @brief:	Feature enables user to set his own timer
- *			where he specifies turning ON and OFF time and actions
- *			triggered at indicated time
- * @param:	turnOnTime		: Time when to start executing action as seconds
- * @param:	activeTime		: Time to keep execution of "alarm" task ON as seconds
- * @param:	*actionON(void)	: Action to be executed at turnOnTime
- * @param:	*actionOFF(void): Action to be executed at turnOnTime + activeTime
- * @param:	currentTime		: Current time as seconds
- * @return:	None
- */
-void userTimer(uint32_t turnOnTime, uint32_t activeTime, void (*actionON)(void), void (*actionOFF)(void), uint32_t currentTime);
-
-/**
  * @brief  Gets time from struct indicated by user and returns it as seconds
  * @param  Struct consisting of hours minutes and seconds
  * @return Time counted from passed Struct as second
@@ -137,5 +124,12 @@ void powerSaveInit(void);
  * @return	None
  */
 void goToSleep(void);
+
+/**
+ * @brief
+ * @param
+ * @return
+ */
+uint32_t timeToMinutes(time *tmp);
 
 #endif

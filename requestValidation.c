@@ -180,29 +180,30 @@ void conditionalSwitch(condSwitch *_condSwitch, value * _value, uint32_t current
  Input:		Global current time, Time to start, time from start till the end, start and finish
  Notice:	Time resolution: minutes
  **************************************************************************/
-uint8_t timerSwitch(uint32_t currentTime, uint32_t turnOnTime, uint32_t activeTime) {
-	if(!startCallback || !endCallback) {
+uint8_t timerSwitch(uint32_t currentTime, uint32_t turnOnClock, uint32_t activeTime) {
+	if(!startCallback || !endCallback || !activeTime) {
 		return 0;
 	}
 
 	static uint8_t isOn = 0;
-	if( (currentTime == turnOnTime) && !isOn ) {
+	if( (currentTime >= turnOnClock) && !isOn ) {
 		startCallback();
 		isOn= 1;
 	} else if(!isOn) {
-		return 0;
+		return isOn;
 	}
 
 	static uint32_t passedTime = 0;
-	if(currentTime > turnOnTime) {
-		passedTime = currentTime - turnOnTime;
-	} else if(isOn) {
-		passedTime = ( (24*60)-turnOnTime ) + currentTime;
+	if(currentTime >= turnOnClock) {
+		passedTime = currentTime - turnOnClock;
+	} else {
+		passedTime = ( (24*60)-turnOnClock ) + currentTime;
 	}
 
-	if( (passedTime == activeTime) && isOn ) {
+	if(passedTime >+ activeTime) {
 		endCallback();
 		isOn = 0;
+		passedTime = 0;
 	}
 	return isOn;
 }

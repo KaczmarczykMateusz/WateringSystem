@@ -41,7 +41,7 @@ void keyPress(tButton * btn, void (*action)(void)) {
 
  	if(!btn->PressKeyLock && !key_press) {
 		btn->PressKeyLock = 35000;
-		btn->longPressLock = LONG_PRESS_LOCK_VAL;
+	//	btn->longPressLock = LONG_PRESS_LOCK_VAL;
 		if(action) {
 			action(); // action for PRESS of button
 		}
@@ -60,7 +60,8 @@ void keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longPres
  	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
 
  	if(!btn->PressKeyLock && !key_press) {
-		btn->PressKeyLock = 35000;
+ 		btn->longPressExecuted = 0;
+		btn->PressKeyLock = 50000;
 		btn->longPressLock = LONG_PRESS_LOCK_VAL;
 		if(shortPressAction) {
 			shortPressAction(); // action for PRESS of button
@@ -69,10 +70,11 @@ void keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longPres
 		(++btn->PressKeyLock);
 	} else if(!key_press && btn->longPressLock) {
 		btn->longPressLock++;
-	} else if(!btn->longPressLock && !key_press) {
+	} else if(!btn->longPressLock && !key_press && !btn->longPressExecuted) {
 		if(longPressAction) {
 			longPressAction(); // action for PRESS of button
 		}
+		btn->longPressExecuted = 1;
 	}
 
  }
@@ -104,7 +106,7 @@ void keyPushUp(tButton * btn, void (*action)(void)) {
  	 	   and struct with time to be set
  Returns:  Set if time got changed
  **************************************************************************/
-uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t maxVal, time *modTime) {
+uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint32_t *modVal, uint32_t maxVal, time *modTime) {
 	static uint8_t longPress = 0;
 	static uint8_t shorterDelay = 0;
 	uint8_t opPerformed = 0;
@@ -129,7 +131,7 @@ uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t max
 		if(modTime && !addPressed) {
 			if(temporaryVal >= 60) {
 				modTime->hour ++;
-			} else {
+			} else if(modTime) {
 				modTime->minute += temporaryVal;
 			}
 			timeDivision(modTime);
@@ -137,11 +139,13 @@ uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t max
 			if(temporaryVal < 60) {
 				modTime->minute -= temporaryVal;
 			}
-			if(modTime->minute > 59) {
-				modTime->minute = 59;
-				modTime->hour --;
-				if(modTime->hour > 59) {
-					modTime->hour = 23;
+			if(modTime) {
+				if(modTime->minute > 59) {
+					modTime->minute = 59;
+					modTime->hour --;
+					if(modTime->hour > 59) {
+						modTime->hour = 23;
+					}
 				}
 			}
 			timeDivision(modTime);
@@ -150,11 +154,13 @@ uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t max
 		} else if(modVal && !subtrPressed) {
 			*modVal -= temporaryVal;
 		}
-		if(maxVal == 1) {			//In case if we use toggle mode
-			*modVal = 0;
-		} else {
-			if(*modVal > maxVal) {
-				*modVal = maxVal;
+		if(modVal) {
+			if(maxVal == 1) {			//In case if we use toggle mode
+				*modVal = 0;
+			} else {
+				if(*modVal > maxVal) {
+					*modVal = maxVal;
+				}
 			}
 		}
 

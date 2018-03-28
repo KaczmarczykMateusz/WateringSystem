@@ -22,11 +22,6 @@
 #define ALARM_TOGGLE    PORTC ^= (1<<PC1)
 #define IS_ALARM_ON	    PORTC & (1<<PC1)
 
-
-void timerSetModeNextStep(void) {
-	setTimerFlag++;
-}
-
 void relOFF(void) {
 	RELAY_OFF;
 }
@@ -189,56 +184,14 @@ void menuItem(char *row1, char *row2) {
  Function: 	()
  Purpose:
  **************************************************************************/
-void setClockMode(void) {
-	setTimerFlag = 1;
-}
-
-/*************************************************************************
- Function: 	()
- Purpose:
- **************************************************************************/
-void setTimeOnMode(void) {
-	setTimerFlag = 2;
-}
-
-/*************************************************************************
- Function: 	()
- Purpose:
- **************************************************************************/
-void setTimerMode(void) {
-	setTimerFlag = 3;
-}
-
-/*************************************************************************
- Function: 	()
- Purpose:
- **************************************************************************/
-void setVolumeMode(void) {
-	setTimerFlag = 4;
-}
-
-/*************************************************************************
- Function: 	()
- Purpose:
- **************************************************************************/
-void setCtrlMode(void) {
-	setTimerFlag = 5;
-}
-
-//TODO: implement humidity button
-/*************************************************************************
- Function: 	()
- Purpose:
- **************************************************************************/
-void setHumidityMode(void) {
-	setTimerFlag = 0;
-}
-
-//TODO: implement humidity button
-/*************************************************************************
- Function: 	()
- Purpose:
- **************************************************************************/
 void exitServiceMode(void) {
-	setTimerFlag = 6;
+	setTimerFlag = 7;
+}
+
+/*************************************************************************
+ Function: 	incrDigit()
+ Purpose:
+ **************************************************************************/
+void incrDigit(void) {
+	setTimerFlag++;
 }

@@ -17,19 +17,11 @@
 #include "clock.h"
 
 //	@brief Buttons masks definitions
-#define SET_BTN_MASK 	(1<<PD3)
 #define SELECT_BTN_MASK (1<<PD5)
 #define STOP_BTN_MASK 	(1<<PD4)
 
-#define INCR_BTN_MASK		(1<<PA4)
+#define INCR_BTN_MASK		(1<<PD3)
 #define DCR_BTN_MASK		(1<<PA5)
-#define CTRL_BTN_MASK		(1<<PA6)
-#define VOL_BTN_MASK		(1<<PA7)
-#if 0
-//another version
-#define HUMIDITY_BTN_MASK	(1<<PA3)
-
-#endif
 
 // @brief	definitions of numbers of PINs of microcontroller for matrix keypad, just to improve readability
 #define ROW_A 	7	// @brief	connect very left PIN of keyboard (closest to '1','*') to Px7 of Atmega
@@ -54,6 +46,7 @@ typedef struct {
 	uint16_t PressKeyLock;		//@brief overfloving counter lock of press event
 	uint8_t PushupKeyLock;		//@brief overfloving counter lock of push up event
 	uint16_t longPressLock;		//@brief overfloving counter lock of long press event
+	uint8_t longPressExecuted;		//@brief
 } tButton;
 
 /**
@@ -100,7 +93,7 @@ void keyPushUp(tButton * btn, void (*action)(void));
  *  @return Set if time got changed, and modify time values
  *  @notice	val and tmp are interchangable
  */
-uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint8_t *modVal, uint8_t maxVal, time *modTime);
+uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint32_t *modVal, uint32_t maxVal, time *modTime);
 
 
 

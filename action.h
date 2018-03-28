@@ -33,7 +33,6 @@ uint8_t lockMainScreen;
 
 void turnAlarmOff(void);
 void turnAlarmOn(void);
-void timerSetModeNextStep(void);
 void relOFF(void);
 void relON(void);
 void outOFF(void);
@@ -101,38 +100,13 @@ void relToggle(void);
 void alarmToggle(void);
 
 /**
- * @brief: enter global clock setting mode
- */
-void setClockMode(void);
-
-/**
- * @brief: enter starting action time setting mode
- */
-void setTimeOnMode(void);
-
-/**
- * @brief: enter length of action (time) setting mode
- */
-void setTimerMode(void);
-
-/**
- * @brief: enter length of action (volume) setting mode
- */
-void setVolumeMode(void);
-
-/**
- * @brief: enter control setting mode (litres/minutes)
- */
-void setCtrlMode(void);
-
-/**
- * @brief: enter humidity control setting mode (moisture or not)
- */
-void setHumidityMode(void);
-
-/**
  * @brief: proceed to normal operation
  */
 void exitServiceMode(void);
+
+/** @brief  Write to HD44780 data half byte by half byte while in 4 bit interface mode
+ *  @param  older half of byte to send
+ */
+void incrDigit(void);
 
 #endif

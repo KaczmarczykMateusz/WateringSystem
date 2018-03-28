@@ -8,11 +8,18 @@
  */
 #include "main.h"
 #include <math.h>
-const char systemReady[] = "GOTOWY";
-const char systemWorking[] = "PRACA";
-const char* litreCtrlTxt = "ltr";
-const char* minuteCtrlTxt = "min";
-char* currControl;
+
+char* sysReadylBuff = "GOTOWY";
+char* sysWorkingBuff = "PRACA";
+char* litreCtrlTxt = "ltr";
+char* minuteCtrlTxt = "min";
+char* moistOnTxt = "TAK";
+char* moistOffTxt = "NIE";
+
+char* currCtrlBuff;
+char* currMoistCtrlBuff;
+char* currSysStatusBuff;
+
 
 int main(void) {
 	uint8_t minMoist = 0;
@@ -23,17 +30,18 @@ int main(void) {
 	uint32_t wfTemp = 0;
 
 	uint8_t resetSecond = 0;
+	uint32_t timerTime = 0;
+
+	uint16_t blinkDelay;	//TODO: delete global definition
 
 //TODO: implement macro defining button port letter (eg. "A", or "B")
-	tButton clockBtn = btnInit(&DDRD, &PORTD, &PIND, SELECT_BTN_MASK);
-	tButton turnOnTimeBtn = btnInit(&DDRD, &PORTD, &PIND, STOP_BTN_MASK);
-	tButton timerBtn = btnInit(&DDRD, &PORTD, &PIND, CTRL_BTN_MASK);
-	tButton incrTimeBtn = btnInit(&DDRA, &PORTA, &PINA, INCR_BTN_MASK);
+	//TODO: add btn waking up display(stopBtn)
+	tButton stopBtn = btnInit(&DDRD, &PORTD, &PIND, STOP_BTN_MASK);
+	tButton selectBtn = btnInit(&DDRD, &PORTD, &PIND, SELECT_BTN_MASK);
+// TODO: change buttons masks (probablu to "override" adc)
+	tButton incrTimeBtn = btnInit(&DDRD, &PORTD, &PIND, INCR_BTN_MASK);
 	tButton dcrTimeBtn = btnInit(&DDRA, &PORTA, &PINA, DCR_BTN_MASK);
-	tButton volumeBtn = btnInit(&DDRD, &PORTD, &PIND, VOL_BTN_MASK);
-	tButton ctrlModeBtn = btnInit(&DDRD, &PORTD, &PIND, SET_BTN_MASK); //TODO: implement this button
 
-//	tButton humidityBtn = btnInit(&DDRD, &PORTD, &PIND, HUMIDITY_BTN_MASK);
 
 	TVOLT moist[3];
 	moist[0].ref_v = 234;
@@ -45,34 +53,42 @@ int main(void) {
 	blinkDelay = BLINK_DELAY_FREQ;
 	controlFactor = LITRES;
 	systemStatus = READY;
+	moistCtrl = MOIST_OFF;
+	isBlink = 0;
 
 	systemInit();
 
+	sprintf(firstRowBuffLCD,"INITIALISATION ");
+	sprintf(secondRowBuffLCD,"INITIALISATION");
+	printSimpleScreen(firstRowBuffLCD, secondRowBuffLCD);
+	_delay_ms(500);
 	while (1) {
 // 		@brief: stops alarm or watering ONLY while it's running
-//		keyPress(&turnOnTimeBtn, 0);
+
 		if(!setTimerFlag) {
-			keyLongPress(&clockBtn, NULL, setClockMode);
-			keyLongPress(&turnOnTimeBtn, NULL, setTimeOnMode);
-			keyLongPress(&timerBtn, NULL, setTimerMode);
-			keyLongPress(&volumeBtn, NULL, setVolumeMode);
-			keyLongPress(&ctrlModeBtn, NULL, setCtrlMode);
+			keyLongPress(&selectBtn, NULL, incrDigit);
 		}
-#if 0
- 		keyLongPress(&volumeBtn, setVolumeMode, serviceModeEntry);
-		keyLongPress(&ctrlModeBtn, setCtrlMode, serviceModeEntry);
-		keyLongPress(&humidityBtn, setHumidityMode, serviceModeEntry);
-#endif
 
 		uartCheck(parse_uart_data);
 
-		if((controlFactor==MINUTES) && (currControl!=&minuteCtrlTxt[0])) {
-			currControl= minuteCtrlTxt;
-		} else if(currControl!=&litreCtrlTxt[0]) {
-			currControl= litreCtrlTxt;
+		//TODO: move it to some function
+		if(  (controlFactor==MINUTES) && (currCtrlBuff!=minuteCtrlTxt)  ) {
+			currCtrlBuff= minuteCtrlTxt;
+		} else if(  (controlFactor==LITRES) && (currCtrlBuff!=litreCtrlTxt)  ) {
+			currCtrlBuff= litreCtrlTxt;
+		}
+		if(  (moistCtrl==MOIST_ON) && (currMoistCtrlBuff!=&moistOnTxt[0])  ) {
+			currMoistCtrlBuff= moistOnTxt;
+		} else if(  (moistCtrl==MOIST_OFF) && (currMoistCtrlBuff!=moistOffTxt)  ) {
+			currMoistCtrlBuff= moistOffTxt;
+		}
+		if(  (systemStatus==READY) && (currSysStatusBuff!=&sysReadylBuff[0])  ) {
+			currSysStatusBuff= sysReadylBuff;
+		} else if(  (systemStatus==WORK) && (currSysStatusBuff!=&sysWorkingBuff[0])  ) {
+			currSysStatusBuff= sysWorkingBuff;
 		}
 
-        if((SEC_CHANGED_CHECK) && (!setTimerFlag)) {
+        if(  (SEC_CHANGED_CHECK) ) {
         	SEC_CHANGED_CLEAR;
 
 	        if(MIN_CHANGED_CHECK) {
@@ -89,8 +105,9 @@ int main(void) {
         	}
         	global.second = second;
         	timeDivision(&global);
-        	uint8_t tmp = timerSwitch(timeToSeconds(&global), timeToSeconds(&turnOnTime), timeToSeconds(&activeTime) );
-			if(tmp) {
+        	uint8_t tmp = timerSwitch(timeToMinutes(&global), timeToMinutes(&turnOnTime), timerTime );
+
+        	if(tmp) {
 				systemStatus = WORK;
 			} else {
 				systemStatus = READY;
@@ -103,7 +120,7 @@ int main(void) {
 			wfSensToggle(  ( (systemStatus==WORK)&&(controlFactor==LITRES) )? 1: 0  );
 
 			if(!setTimerFlag) {
-				printMainScreen();
+				printMainScreen(turnOnTime, timerTime, global, currMoistCtrlBuff, currSysStatusBuff);
 			}
 #if 0
 	        //outAlarm();
@@ -131,101 +148,105 @@ int main(void) {
         }
 
 
+
 //	****************** MENU ******************	//
 
 		if((BLINK_DELAY_FREQ/2) == blinkDelay--) {
-			printMainScreen();
+			printMainScreen(turnOnTime, timerTime, global, currMoistCtrlBuff, currSysStatusBuff);
 		} else if((BLINK_DELAY_FREQ/2) > blinkDelay) {
 
 		} else if(BLINK_DELAY_FREQ < blinkDelay) {
 			blinkDelay = BLINK_DELAY_FREQ;
-
-			switch(setTimerFlag) { //GUI switch delayed due to screen refresh
-
-			case 1: //Set system clock
-				sprintf(firstRowBuffLCD,"%03dmin*%02d:%02d*NIE", activeTime.minute, turnOnTime.hour, turnOnTime.minute);
-				sprintf(secondRowBuffLCD,"  :  *%s", (systemStatus==READY) ? systemReady : systemWorking);
-			break;
-
-			case 2: //Set turn ON time
-				sprintf(firstRowBuffLCD,"%03dmin*  :  *NIE", activeTime.minute);
-				sprintf(secondRowBuffLCD,"%02d:%02d*%s", global.hour, global.minute,
-										(systemStatus==READY) ? systemReady : systemWorking);
-			break;
-
-			case 3: //Set how long to keep on (in case control by time (minutes))
-				sprintf(firstRowBuffLCD,"   %s*%02d:%02d*NIE", currControl, turnOnTime.hour, turnOnTime.minute);
-				sprintf(secondRowBuffLCD,"%02d:%02d*%s", global.hour, global.minute,
-										(systemStatus==READY) ? systemReady : systemWorking);
-			break;
-
-			case 4: //Set how long to keep on (in case control by volume (litres))
-				sprintf(firstRowBuffLCD,"   %s* %02d:%02d*NIE", currControl,turnOnTime.hour,  turnOnTime.minute);
-				sprintf(secondRowBuffLCD,"%02d:%02d*%s", global.hour, global.minute,
-										(systemStatus==READY) ? systemReady : systemWorking);
-			break;
-
-			case 5: //Set how long to keep on (in case control by volume (litres))
-				sprintf(firstRowBuffLCD,"%03d   *%02d:%02d*NIE", activeTime.minute, turnOnTime.hour, turnOnTime.minute);
-				sprintf(secondRowBuffLCD,"%02d:%02d*%s", global.hour, global.minute,
-										(systemStatus==READY) ? systemReady : systemWorking);
-			break;
-
-			default:
-				printMainScreen();
-			}
-			printSimpleScreen(firstRowBuffLCD, secondRowBuffLCD);
+			isBlink = 1;
 		}
 
 
-		switch(setTimerFlag) { //System switch without delay
+		switch(setTimerFlag) {
 
 		case 1: //Set system clock
-			//TODO: check if reset second working
-			incrDcr(&incrTimeBtn, &dcrTimeBtn, 0, 0, &global);
-			keyPress(&clockBtn, exitServiceMode);
+			if(isBlink) {
+				sprintf(firstRowBuffLCD,"%02d:%02d*%3ld%s*%s", turnOnTime.hour, turnOnTime.minute,
+															timerTime, currCtrlBuff, currMoistCtrlBuff);
+				sprintf(secondRowBuffLCD,"  :  *%s", currSysStatusBuff);
+			}
+			resetSecond = incrDcr(&incrTimeBtn, &dcrTimeBtn, 0, 0, &global);//TODO: check if reset second working
+			keyPress(&stopBtn, exitServiceMode);
+			keyPress(&selectBtn, incrDigit);
 		break;
 
 		case 2: //Set turn ON time
 			incrDcr(&incrTimeBtn, &dcrTimeBtn, 0, 0, &turnOnTime);
-			keyPress(&turnOnTimeBtn, exitServiceMode);
+			keyPress(&stopBtn, exitServiceMode);
+			keyPress(&selectBtn, incrDigit);
+			if(isBlink) {
+				sprintf(firstRowBuffLCD,"  :  *%3ld%s*%s", timerTime, currCtrlBuff, currMoistCtrlBuff);
+				sprintf(secondRowBuffLCD,"%02d:%02d*%s", global.hour, global.minute, currSysStatusBuff);
+			}
 		break;
 
 		case 3: //Set how long to keep ON (by time (minutes))
-			incrDcr(&incrTimeBtn, &dcrTimeBtn, 0, 0, &activeTime);
-			keyPress(&timerBtn, exitServiceMode);
+			incrDcr(&incrTimeBtn, &dcrTimeBtn, &timerTime, 0, NULL);
+			keyPress(&stopBtn, exitServiceMode);
+			keyPress(&selectBtn, incrDigit);
+			if(isBlink) {
+				sprintf(firstRowBuffLCD,"%02d:%02d*   %s*%s", turnOnTime.hour, turnOnTime.minute,
+																		currCtrlBuff, currMoistCtrlBuff);
+				sprintf(secondRowBuffLCD,"%02d:%02d*%s", global.hour, global.minute, currSysStatusBuff);
+			}
 		break;
 
 		case 4: //Set how long to keep on (by volume (litres))
-		//	incrDcr(&incrTimeBtn, &dcrTimeBtn, &wfDoseVol, 9999, 0);	//Maximum 9999 liters as decilitre
-			//TODO:add exit button
-			keyLongPress(&volumeBtn, NULL, setVolumeMode);
+			incrDcr(&incrTimeBtn, &dcrTimeBtn, &wfDoseVol, 9999, 0);	//Maximum 9999 liters as decilitre
+			keyLongPress(&stopBtn, NULL, exitServiceMode);
+			keyPress(&selectBtn, incrDigit);
+			if(isBlink) {
+				sprintf(firstRowBuffLCD,"%02d:%02d*   %s*%s", turnOnTime.hour,  turnOnTime.minute, currCtrlBuff, currMoistCtrlBuff);
+				sprintf(secondRowBuffLCD,"%02d:%02d*%s", global.hour, global.minute, currSysStatusBuff);
+			}
 		break;
 
 		case 5:
-			keyLongPress(&ctrlModeBtn, NULL, exitServiceMode);
-			keyLongPress(&incrTimeBtn, NULL, controlMode);
-			keyLongPress(&dcrTimeBtn, NULL, controlMode);
+			keyLongPress(&stopBtn, NULL, exitServiceMode);
+			keyPress(&incrTimeBtn, toggleCtrl);
+			keyPress(&dcrTimeBtn, toggleCtrl);
+			keyPress(&selectBtn, incrDigit);
+			if(isBlink) {
+				sprintf(firstRowBuffLCD,"%02d:%02d*%3ld   *%s", turnOnTime.hour, turnOnTime.minute, timerTime, currMoistCtrlBuff);
+				sprintf(secondRowBuffLCD,"%02d:%02d*%s", global.hour, global.minute, currSysStatusBuff);
+			}
 		break;
 
-		case 6:
-			registerStartActionCallback(relON);
-			registerEndActionCallback(relOFF);
-			setTimerFlag = 0;
+		case 6: //Set how long to keep on (by volume (litres))
+			keyLongPress(&selectBtn, NULL, exitServiceMode);	//TODO: change action performed by function
+			keyLongPress(&stopBtn, NULL, exitServiceMode);	//TODO: change action performed by function
+			keyPress(&incrTimeBtn, toggleHumidityCtrl);
+			keyPress(&dcrTimeBtn, toggleHumidityCtrl);
+			keyPress(&selectBtn, incrDigit);
+			if(isBlink) {
+				sprintf(firstRowBuffLCD,"%02d:%02d*%3ld%s*   ", turnOnTime.hour, turnOnTime.minute, timerTime, currCtrlBuff);
+				sprintf(secondRowBuffLCD,"%02d:%02d*%s", global.hour, global.minute, currSysStatusBuff);
+			}
 		break;
 
 		case 7:
-#if 0
-		if(calibrateMoistSensor(1, setTimerFlag, moisture[0], &clockBtn, &turnOnTimeBtn) == 0)	{
-			continue;		//Prevent from entering classic MENU
-		}
-#endif
+			registerStartActionCallback(relON);
+			registerEndActionCallback(relOFF);
+			setTimerFlag = 0;
 		break;
 
 		default:
 			if(setTimerFlag) {
 				setTimerFlag = 0;
 			}
+			if(isBlink) {
+				printMainScreen(turnOnTime, timerTime, global, currMoistCtrlBuff, currSysStatusBuff);
+				isBlink = 0;
+			}
+		}
+
+		if(isBlink) {
+			printSimpleScreen(firstRowBuffLCD, secondRowBuffLCD);
+			isBlink = 0;
 		}
 //      goToSleep();
 	}
@@ -264,22 +285,45 @@ void systemInit(void) {
 /*************************************************************************
  Function: 	printMainScreen()
  Purpose:	Prints basic screen
+ Input	:	activeTime - how long to wait from start tilll the end of action
+ 	 	 	turnOnClock	-
+ 	 	 	globalClock
  **************************************************************************/
-void printMainScreen(void) {
-	sprintf(firstRowBuffLCD,"%03d%s*%02d:%02d*NIE", activeTime.minute, currControl, turnOnTime.hour, turnOnTime.minute);
-	sprintf(secondRowBuffLCD,"%02d:%02d*%s", global.hour, global.minute,
-											(systemStatus==READY) ? systemReady : systemWorking);
+void printMainScreen(time turnOnClock, uint32_t activeTime, time globalClock, char* sysMoistStat, char* sysStat) {
+	sprintf(firstRowBuffLCD,"%02d:%02d*%3ld%s*%s", turnOnClock.hour, turnOnClock.minute,
+													activeTime, currCtrlBuff, sysMoistStat);
+	sprintf(secondRowBuffLCD,"%02d:%02d*%s", globalClock.hour, globalClock.minute, sysStat);
 	printSimpleScreen(firstRowBuffLCD, secondRowBuffLCD);
 }
 
 /*************************************************************************
- Function: 	printMainScreen()
- Purpose:	Prints basic screen
+ Function: 	toggleCtrl()
+ Purpose:	Toggle between system control modes
  **************************************************************************/
-void controlMode(void) {
+void toggleCtrl(void) {
 	if(controlFactor == LITRES) {
 		controlFactor = MINUTES;
 	} else {
 		controlFactor = LITRES;
 	}
 }
+
+/*************************************************************************
+ Function: 	toggleHumidityCtrl()
+ Purpose:	Toggle between system  reacting for moisture or not
+ **************************************************************************/
+void toggleHumidityCtrl(void) {
+	if(moistCtrl == MOIST_ON) {
+		moistCtrl = MOIST_OFF;
+	} else {
+		moistCtrl = MOIST_ON;
+	}
+}
+
+
+
+
+
+
+
+
