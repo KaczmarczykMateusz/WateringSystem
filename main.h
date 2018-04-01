@@ -29,6 +29,7 @@
 #include "action.h"
 #include "spi.h"
 #include "fat16.h"
+#include "common.h"
 
 static const uint16_t BLINK_DELAY_FREQ = 35000;
 uint16_t blinkDelay;
@@ -40,35 +41,17 @@ time activeTime;
 TEMP temp;
 
 double wf;
-char printLCDBuffer[16];
-char buff1[16];
 
+char firstRowBuffLCD[17];
+char secondRowBuffLCD[17];
 char currTemp[9];
 uint8_t lightStrength;
 uint8_t moisture[3];
 
 uint16_t blinkDelays;
-char firstRowBuffLCD[17];
-char secondRowBuffLCD[17];
 
-uint8_t isBlink;
+uint8_t activateSystem;
 
-typedef enum {
-	READY,
-	WORK
-} status;
-
-typedef enum {
-	MINUTES,
-	LITRES
-} control;
-
-typedef enum {
-	MOIST_ON,
-	MOIST_OFF
-} moistureCtrl;
-
-status systemStatus;
 control controlFactor;
 moistureCtrl moistCtrl;
 
@@ -90,5 +73,6 @@ void controlMode(void);
 
 void toggleCtrl(void);
 void toggleHumidityCtrl(void);
+void activDeactivSystem(void);
 
 #endif

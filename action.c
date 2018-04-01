@@ -95,9 +95,9 @@ void uartWriteCurrTime(void) {
  **************************************************************************/
 void uartWriteTemp(TEMP * temperature) {
 	uartPuts("Temp. ");
-	sendInteger(temp.tempInt);
+	sendInteger(temperature->tempInt);
 	uartPuts(".");
-	sendInteger(temp.tempFract);
+	sendInteger(temperature->tempFract);
 	uartPuts("*C");
 }
 

@@ -97,7 +97,6 @@ void keyPushUp(tButton * btn, void (*action)(void)) {
 	}
 }
 
-
 /*************************************************************************
  Function: incrDcr()
  Purpose:  Incrementing and/ or decrementing time or value
@@ -157,10 +156,8 @@ uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint32_t *modVal, uint32_t m
 		if(modVal) {
 			if(maxVal == 1) {			//In case if we use toggle mode
 				*modVal = 0;
-			} else {
-				if(*modVal > maxVal) {
-					*modVal = maxVal;
-				}
+			} else if(*modVal > maxVal) {
+				*modVal = maxVal;
 			}
 		}
 

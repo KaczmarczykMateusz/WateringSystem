@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <avr/io.h>
 #include "lcd.h"
+#include "common.h"
 
 typedef enum _startAction {
 	WAIT			=	(1UL << 0),	//@brief: Wait until next day
@@ -24,23 +25,6 @@ typedef enum _startAction {
 //	START_COUNTER	=	TURN_ON_TIME | WAIT_TO_CONFIRM	//@brief: Starts passed time counter
 }processValidation;
 
-//@brief: Holds conditional switch condition variables
-typedef struct _condSwitch {
-	uint8_t moistureMin;	//@brief: Minimum moisture at which watering process can be triggered
-	uint16_t presetWf ;		//@brief: Water volume which is to be applied during watering process
-	uint32_t turnOnTime;	//@brief: Time at which further validation enabled
-	uint32_t activeTime;	//@brief: Time window in which system process validation
-}condSwitch;
-
-//@brief: Holds actual values from sensors
-typedef struct _value {
-	uint8_t moisture;	//@brief: Actual moisture as percents
-	uint8_t bright;		//@brief: Actual brightness as percents
-	uint16_t wfVolume;	//@brief: Actual water flow volume as centilitres (1cl = 1/100l)
-	uint32_t temp;		//@brief: Actual temperature multiplied by 100
-}value;
-
-
 /**	@brief:	Assign values from sensors to storage variables
  *	@param:	*_value	: Structure holding all real sensor values
  *	@param: moisture: actual moisture as percents
@@ -49,7 +33,7 @@ typedef struct _value {
  *					  last starting of the pump as centilitres (1cl = 1/100l)
  *	@param: bright	:  actual brightness as percents
  */
-void updateSensorValues(value (*), uint8_t, uint32_t, uint16_t, uint8_t);
+value updateSensorValues(uint8_t moisture, uint32_t temp, uint16_t wfVolume, uint8_t bright);
 
 /**
  *
@@ -64,7 +48,7 @@ void updateSensorValues(value (*), uint8_t, uint32_t, uint16_t, uint8_t);
  *						  Ensure to call this function after every change of conditions
  *  @see:	conditionalSwitch()
 */
-void updateConditionalSwitch(condSwitch (*),uint32_t turnOnTime, uint32_t activeTime, uint8_t moistureMin, uint16_t presetWf);
+condSwitch updateConditionalSwitch(uint32_t turnOnTime, uint32_t complexCheckTime, uint8_t moistureMin, uint16_t presetWf, uint32_t procesTime);
 
 /**
  * @brief:	Prototype of starting action callback function to be replaced with executing function
@@ -96,7 +80,7 @@ void registerEndActionCallback(void (*endAction)(void));
  * @param: Current global time as seconds
  * @param: Flag terminating action before it expires
  */
-void conditionalSwitch(condSwitch *_condSwitch, value * _value, uint32_t currentTime, uint8_t *shutDown);
+status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentTime, uint8_t activate);
 
 /**
  * @brief:	Feature enables user to set his own timer
