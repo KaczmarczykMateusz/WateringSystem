@@ -40,7 +40,7 @@ void keyPress(tButton * btn, void (*action)(void)) {
  	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
 
  	if(!btn->PressKeyLock && !key_press) {
-		btn->PressKeyLock = 35000;
+		btn->PressKeyLock = 1;
 	//	btn->longPressLock = LONG_PRESS_LOCK_VAL;
 		if(action) {
 			action(); // action for PRESS of button
@@ -61,7 +61,7 @@ void keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longPres
 
  	if(!btn->PressKeyLock && !key_press) {
  		btn->longPressExecuted = 0;
-		btn->PressKeyLock = 50000;
+		btn->PressKeyLock = 1;
 		btn->longPressLock = LONG_PRESS_LOCK_VAL;
 		if(shortPressAction) {
 			shortPressAction(); // action for PRESS of button

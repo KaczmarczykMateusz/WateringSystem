@@ -86,17 +86,18 @@ status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentT
 	static uint32_t savedTemperature = 0;
 	uint32_t passedTime = 0;
 
-	//TODO: reinvent if statement below (it case system not to work
-	if(!activate) {
-#if 0
+	static uint8_t activateHold = 0;
+	if(activateHold != activate) {
 		if(endCallback) {
 			endCallback();
 		}
-#endif
-		workStatus = NOT_READY;
-	} else {
-		workStatus = READY;
+		if(!activate) {
+			workStatus = NOT_READY;
+		} else {
+			workStatus = READY;
+		}
 	}
+	activateHold = activate;
 
 	/* purpose: Check when to start/ stop defined workStatus (by default: watering) */
 	switch(workStatus) {
@@ -155,7 +156,7 @@ status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentT
 				workStatus = NOT_READY;
 			}
 		} else {
-			if(currentTime > (currentTime+_condSwitch.procesTime)) {
+			if(currentTime > (_condSwitch.turnOnTime+_condSwitch.procesTime)) {
 				/* purpose: Terminate workStatus */
 				if(endCallback) {
 					endCallback();

@@ -34,33 +34,25 @@
 static const uint16_t BLINK_DELAY_FREQ = 35000;
 uint16_t blinkDelay;
 
-time global;
-time turnOnTime;
-time activeTime;
-
 TEMP temp;
 
 double wf;
 
 char firstRowBuffLCD[17];
 char secondRowBuffLCD[17];
-char currTemp[9];
-uint8_t lightStrength;
-uint8_t moisture[3];
 
-uint16_t blinkDelays;
+
+time global;
+time turnOnTime;
+time activeTime;
+
 
 uint8_t activateSystem;
 
 control controlFactor;
 moistureCtrl moistCtrl;
 
-void setClockMode(void);
-void setTimeOnMode(void);
-void setTimerMode(void);
-void setVolumeMode(void);
-void setCtrlMode(void);
-void setHumidityMode(void);
+
 void exitServiceMode(void);
 
 /**
@@ -74,5 +66,6 @@ void controlMode(void);
 void toggleCtrl(void);
 void toggleHumidityCtrl(void);
 void activDeactivSystem(void);
+TEMP readTemp(void) ;
 
 #endif

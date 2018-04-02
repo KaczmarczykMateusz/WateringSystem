@@ -44,7 +44,7 @@ void incrMinMoist(void);
 /** @brief  send current time via
  *  @param	None
  */
-void uartWriteCurrTime(void);
+void uartWriteCurrTime(time currTime);
 
 /** @brief  send temperature via
  *  @param

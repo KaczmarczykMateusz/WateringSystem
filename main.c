@@ -1,12 +1,18 @@
+//TODO: implement powering of lcd from I/O via transistor
+	//TODO: delete include main.h from action.h
 
-//main.h ---- delete enums
+	//TODO: remove definitions
+	/*
+	 * void setClockMode(void);
+void setTimeOnMode(void);
+void setTimerMode(void);
+void setVolumeMode(void);
+void setCtrlMode(void);
+void setHumidityMode(void);
 
+*/
 
-
-
-
-
-
+//TODO: try to replace func from below with incrdcr fuction
 
 /*
  ============================================================================
@@ -33,7 +39,9 @@ char* currSysStatusBuff;
 
 
 int main(void) {
-	uint8_t dsFlag = 0;
+
+	uint8_t moisture[3];
+
 	uint8_t minMoist = 0;
 	uint32_t wfDoseVol = 0;
 	uint8_t temporaryLockFlag = 1;
@@ -60,7 +68,6 @@ int main(void) {
 	condSwitch switchConditions; // todo: throw it out from header file and define here
 	value val;
 	TEMP temp;
-    time activeTime;
 	status systemStatus;
 
 	TVOLT light;
@@ -129,14 +136,7 @@ int main(void) {
 				lightStrength = lightSensor(&light);
 #endif
 	        }
-			if(!dsFlag) {			//	Start conversion
-				ds18b20_ConvertT();
-				dsFlag = 1;
-			} else {				// Read converted temperature
-				readTemperature(&temp);
-				sprintf(currTemp, "%2ld.%01ld\xdf""C", temp.tempInt, temp.tempFract);
-				dsFlag = 0;
-			}
+			temp = readTemp();
 			val = updateSensorValues(moisture[0], temp.tempMultip, wfVolAccu, lightStrength);
 			switchConditions = updateConditionalSwitch(timeToSeconds(&turnOnTime), 100, minMoist, wfDoseVol, timeToSeconds(&activeTime));//TODO replace hardcoded val
 			systemStatus = conditionalSwitch(switchConditions, val, timeToSeconds(&global), activateSystem);
@@ -200,7 +200,6 @@ int main(void) {
 			isBlink = 1;
 		}
 		static uint32_t lengthON = 0;
-
 
 		switch(setTimerFlag) {
 
@@ -372,3 +371,17 @@ void activDeactivSystem(void) {
 		activateSystem = 1;
 	}
 }
+
+TEMP readTemp(void) {
+	static uint8_t conversionDone = 1;
+	static TEMP tmpTemp;
+	if(!conversionDone) {			//	Start conversion
+		ds18b20_ConvertT();
+		conversionDone = 1;
+	} else {				// Read converted temperature
+		readTemperature(&tmpTemp);
+		conversionDone = 0;
+	}
+	return tmpTemp;
+}
+

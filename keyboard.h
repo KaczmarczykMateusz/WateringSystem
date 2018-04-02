@@ -43,7 +43,7 @@ typedef struct {
 	volatile uint8_t *K_DDR;
 	volatile uint8_t *K_PORT;
 	uint8_t key_mask;			//@brief mask: physical PIN of microcontroller assigned tobutton
-	uint16_t PressKeyLock;		//@brief overfloving counter lock of press event
+	uint8_t PressKeyLock;		//@brief overfloving counter lock of press event
 	uint8_t PushupKeyLock;		//@brief overfloving counter lock of push up event
 	uint16_t longPressLock;		//@brief overfloving counter lock of long press event
 	uint8_t longPressExecuted;		//@brief

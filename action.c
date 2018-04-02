@@ -70,22 +70,22 @@ void outAlarm(void) {
  Function:	uartWriteCurrTime()
  Purpose:	Write current real time via UART  to console
  **************************************************************************/
-void uartWriteCurrTime(void) {
-	if(global.hour < 10) {
+void uartWriteCurrTime(time currTime) {
+	if(currTime.hour < 10) {
 		uartPuts("0");
 	}
-	sendInteger(global.hour);
+	sendInteger(currTime.hour);
 	uartPuts(":");
-	if(global.minute < 10) {
+	if(currTime.minute < 10) {
 		uartPuts("0");
 	}
-	sendInteger(global.minute);
+	sendInteger(currTime.minute);
 	uartPuts(":");
 
-	if(global.second < 10) {
+	if(currTime.second < 10) {
 		uartPuts("0");
 	}
-	sendInteger(global.second);
+	sendInteger(currTime.second);
 }
 
 /*************************************************************************
@@ -144,7 +144,7 @@ void uartWriteWaterflow(uint32_t perMinute, uint32_t accumulated) {
   	  	  	via UART  to console
  **************************************************************************/
 void uartWriteSensorData(TEMP *temperature, uint8_t light, uint8_t moistSenCount, uint8_t *moistPercent, uint32_t perMinute, uint32_t accumulated) {
-	uartWriteCurrTime();
+//	uartWriteCurrTime();//TODO: pass global time
 	uartWriteTemp(temperature);
 	uartWriteLight(light);
 	uartWriteMoisture(moistSenCount, moistPercent); // TODO check if pointer working properly
@@ -175,8 +175,10 @@ void menuItem(char *row1, char *row2) {
 		printSimpleScreen(row1, row2);
 		INPUT_MODIFIED_CLEAR;
 		SEC_CHANGED_CLEAR;
+#if 0	//TODO: pass global time
 		global.second = second;
 		timeDivision(&global);
+#endif
 	}
 }
 
