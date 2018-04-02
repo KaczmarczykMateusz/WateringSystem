@@ -83,7 +83,7 @@ uint8_t moistCheckResult(uint8_t flag, TVOLT *mSens, uint8_t *sensNo) ;
  *  @return	: 1 : Service MENU displayed
  *  		  0 : Service MENU not displayed
  */
-uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8_t actualMoist, tButton *addBtn, tButton *subtrBtn);
+uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8_t actualMoist, tButton *addBtn, tButton *subtrBtn, time _globalTime);
 
 uint16_t moistSensMinOut; //@brief: Value in volt multiplied "* 100"
 uint16_t moistSensMaxOut; //@brief: Maximum value which may be shown by sensor (drought) multiplied "*100" minus "-1"

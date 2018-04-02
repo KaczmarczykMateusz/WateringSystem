@@ -79,14 +79,14 @@ void uartWriteWaterflow(uint32_t perMinute, uint32_t accumulated);
  *  @param	Waterflow per minute [cl/min]
  *  @param 	Waterflow volume since pump working [cl] */
 
-void uartWriteSensorData(TEMP *temperature, uint8_t light, uint8_t moistSenCount, uint8_t *moistPercent, uint32_t perMinute, uint32_t accumulated);
+void uartWriteSensorData(TEMP *temperature, uint8_t light, uint8_t moistSenCount, uint8_t *moistPercent, uint32_t perMinute, uint32_t accumulated, time _globalTime);
 
 /** @brief	Print text, update global time and clear flags menu and RTC flags
  *  @param  *row1	: buffer with text coded in ASCII to be displayed at first row of LCD
  *  @param  *row2	: buffer with text coded in ASCII to be displayed at second row of LCD
  *  @return	None
  */
-void menuItem(char *row1, char *row2);
+void menuItem(char *row1, char *row2, time _time);
 
 /** @brief	Print text, update global time and clear flags menu and RTC flags
  *  @param  None

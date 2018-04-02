@@ -143,8 +143,8 @@ void uartWriteWaterflow(uint32_t perMinute, uint32_t accumulated) {
  Purpose:	Send input data from all sensors available + time
   	  	  	via UART  to console
  **************************************************************************/
-void uartWriteSensorData(TEMP *temperature, uint8_t light, uint8_t moistSenCount, uint8_t *moistPercent, uint32_t perMinute, uint32_t accumulated) {
-//	uartWriteCurrTime();//TODO: pass global time
+void uartWriteSensorData(TEMP *temperature, uint8_t light, uint8_t moistSenCount, uint8_t *moistPercent, uint32_t perMinute, uint32_t accumulated, time _globalTime) {
+	uartWriteCurrTime(_globalTime);
 	uartWriteTemp(temperature);
 	uartWriteLight(light);
 	uartWriteMoisture(moistSenCount, moistPercent); // TODO check if pointer working properly
@@ -167,7 +167,7 @@ void serviceModeEntry(void) {
  Purpose: Print text, update global time and clear flags menu and RTC flags
  Input:	Two rows of text as max 16 char arrays (each one)
  **************************************************************************/
-void menuItem(char *row1, char *row2) {
+void menuItem(char *row1, char *row2, time _time) {
 	lockMainScreen = 1;
 
 	if(	(INPUT_MODIFIED_CHECK) ||
@@ -175,10 +175,8 @@ void menuItem(char *row1, char *row2) {
 		printSimpleScreen(row1, row2);
 		INPUT_MODIFIED_CLEAR;
 		SEC_CHANGED_CLEAR;
-#if 0	//TODO: pass global time
-		global.second = second;
-		timeDivision(&global);
-#endif
+		_time.second = second;
+		timeDivision(&_time);
 	}
 }
 

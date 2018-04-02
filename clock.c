@@ -127,3 +127,13 @@ void goToSleep(void) {
 uint32_t timeToMinutes(time *tmp) {
 	return (uint32_t)((uint32_t)(tmp->hour * 60) + tmp->minute);
 }
+
+
+time initTime() {
+	time tmpTime;
+	tmpTime.second = 0;
+	tmpTime.minute = 0;
+	tmpTime.hour = 0;
+	tmpTime.day = 0;
+	return tmpTime;
+}

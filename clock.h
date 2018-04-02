@@ -13,6 +13,7 @@
 #define CLOCK_H
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
+#include "common.h"
 
 /**
  * @brief	Definitions for timeState values
@@ -56,15 +57,6 @@ volatile uint8_t timeState;
  */
 volatile uint8_t second;
 
-/**
- * @brief	Structure holding date and time
- */
-typedef struct {
-	uint8_t second;
-	uint8_t minute;
-	uint8_t hour;
-	uint8_t day;
-} time;
 
 /**
  * @brief:	Initialisation of Real Time Clock
@@ -131,5 +123,7 @@ void goToSleep(void);
  * @return
  */
 uint32_t timeToMinutes(time *tmp);
+
+time initTime();
 
 #endif

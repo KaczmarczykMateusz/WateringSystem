@@ -43,6 +43,16 @@ typedef enum {
  } complexity;
 
 
+ /**
+  * @brief	Structure holding date and time
+  */
+ typedef struct {
+ 	uint8_t second;
+ 	uint8_t minute;
+ 	uint8_t hour;
+ 	uint8_t day;
+ } time;
+
  //@brief: Holds conditional switch condition variables
  typedef struct _condSwitch {
  	//@brief: Minimum moisture at which watering process can be triggered

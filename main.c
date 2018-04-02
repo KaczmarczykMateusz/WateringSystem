@@ -1,17 +1,5 @@
 //TODO: implement powering of lcd from I/O via transistor
 	//TODO: delete include main.h from action.h
-
-	//TODO: remove definitions
-	/*
-	 * void setClockMode(void);
-void setTimeOnMode(void);
-void setTimerMode(void);
-void setVolumeMode(void);
-void setCtrlMode(void);
-void setHumidityMode(void);
-
-*/
-
 //TODO: try to replace func from below with incrdcr fuction
 
 /*
@@ -39,6 +27,9 @@ char* currSysStatusBuff;
 
 
 int main(void) {
+	time global = initTime();
+	time turnOnTime = initTime();
+	time activeTime = initTime();
 
 	uint8_t moisture[3];
 
@@ -190,7 +181,7 @@ int main(void) {
 
 
 //	****************** MENU ******************	//
-        static uint8_t isBlink = 0;	//TODO:remove global declaration
+        static uint8_t isBlink = 0;
 		if((BLINK_DELAY_FREQ/2) == blinkDelay--) {
 			printMainScreen(turnOnTime, timerTime, global, currMoistCtrlBuff, currSysStatusBuff);
 		} else if((BLINK_DELAY_FREQ/2) > blinkDelay) {

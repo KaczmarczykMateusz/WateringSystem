@@ -42,11 +42,6 @@ char firstRowBuffLCD[17];
 char secondRowBuffLCD[17];
 
 
-time global;
-time turnOnTime;
-time activeTime;
-
-
 uint8_t activateSystem;
 
 control controlFactor;

@@ -107,7 +107,7 @@ uint8_t moistCheckResult(uint8_t isPowered, TVOLT *mSens, uint8_t *sensNo) {
  Input:
  Returns:  None
  **************************************************************************/
-uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8_t actualMoist, tButton *addBtn, tButton *subtrBtn) {
+uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8_t actualMoist, tButton *addBtn, tButton *subtrBtn, time _globalTime) {
 	if(enableServiceMode == (1<<0)) {
 		uint16_t adcPercent = 1000 / 500;					//1000 / (MAX ADC voltage)
 		static uint8_t temporaryBoundry = 0;
@@ -124,7 +124,7 @@ uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8
 #endif
 			sprintf(buff1, "SET MIN: %d%%", temporaryBoundry);
 			sprintf(bufferLCD, "Read: %d%% ->Next", actualMoist);
-			menuItem(buff1, bufferLCD);
+			menuItem(buff1, bufferLCD, _globalTime);
 			moistSensMinOut = (temporaryBoundry * adcPercent) / 10;		// Convert into volts multiplied by 100
 		break;
 
@@ -135,7 +135,7 @@ uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8
 #endif
 			sprintf(buff1, "SET MAX: %d%%", temporaryBoundry);
 			sprintf(bufferLCD, "Read: %d%% ->Next", actualMoist);
-			menuItem(buff1, bufferLCD);
+			menuItem(buff1, bufferLCD, _globalTime);
 			moistSensMaxOut = (temporaryBoundry * adcPercent) / 10;		// Convert into volts multiplied by 100
 		break;
 		default:
