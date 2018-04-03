@@ -35,7 +35,7 @@
 #define COLUMN_4	0	// @brief	connect very right PIN of keyboard (closest to 'A','D') to Px0 of Atmega
 
 #define KEY_PAD_LOCK_VAL	1 //@brief	increasing this value decrease time between single click but may corrupt debouncing
-#define LONG_PRESS_LOCK_VAL 1 //@brief	increasing this value decrease time of to pass until long press event
+#define LONG_PRESS_LOCK_VAL 50000 //@brief	increasing this value decrease time of to pass until long press event
 
 // @brief	struct holding button values
 typedef struct {

@@ -76,143 +76,171 @@ condSwitch updateConditionalSwitch(uint32_t turnOnTime, uint32_t complexCheckTim
 
 /*************************************************************************
  Function: 	conditionalSwitch()
- Purpose:	Check when to start/ stop defined workStatus (by default: watering)
+ Purpose:	Check when to start/ stop defined currentStatus (by default: watering)
  Input:    	CurrentTime 	: Current time converted to seconds
  See: 		resolution: seconds
  **************************************************************************/
 status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentTime, uint8_t activate) {
-
-	static status workStatus = NOT_READY;
-	static uint32_t savedTemperature = 0;
-	uint32_t passedTime = 0;
-
-	static uint8_t activateHold = 0;
-	if(activateHold != activate) {
-		if(endCallback) {
-			endCallback();
-		}
-		if(!activate) {
-			workStatus = NOT_READY;
-		} else {
-			workStatus = READY;
-		}
+	if(!startCallback || !endCallback) {
+		return NOT_READY;
 	}
-	activateHold = activate;
 
-	/* purpose: Check when to start/ stop defined workStatus (by default: watering) */
-	switch(workStatus) {
+	static status currentStatus = NOT_READY;
+	currentStatus = activateSwitch(activate, currentStatus);
 
-	/* purpose: prevent form executing workStatus before timer set*/
-	case NOT_READY:
+	switch(currentStatus) {
+
+	case NOT_READY:	// purpose: don't perform check before switch activated
 	break;
 
-	/* purpose: Wait until time reaches set by user turn ON value */
-	case READY:
-		if(currentTime >= _condSwitch.turnOnTime){
-			if(_condSwitch.complexMode & COMPLEX) {
-				savedTemperature = _value.temp;
-				workStatus = CHECK_TIME_AND_TEMP;
-			} else if(_condSwitch.complexMode & HUMIDITY) {
-				workStatus = CHECK_MOIST;
-			} else {
-				if(startCallback) {
-					startCallback();
-				}
-				workStatus = WORK;
-			}
+	case READY:	// purpose: Wait until time reaches set by user turn ON value
+		if(currentTime >= _condSwitch.turnOnTime) {
+			currentStatus = checkComplexity(_condSwitch);
 		}
 	break;
 
-	/* purpose: Wait until increase of temperature or exceeding 70% of set by user time window */
-	case CHECK_TIME_AND_TEMP:
-		if(_condSwitch.turnOnTime <= currentTime) {
-			passedTime = currentTime - _condSwitch.turnOnTime;
-		} else {
-			passedTime = (  ((uint32_t)(24*60)*60) - _condSwitch.turnOnTime  ) + currentTime;
-		}
-		if(		(passedTime > ((_condSwitch.complexCheckTime) * 0.7f)) ||	// In case 70% of time passed but temperature didn't increase
-				(_value.temp > (savedTemperature + 100)) ) {				// Or in case if temperature increased by 1 Celsius
-			workStatus = CHECK_MOIST;							// Request system on
+	case CHECK_TIME_AND_TEMP:	// purpose: Wait until increase of temperature or exceeding 70% of set by user time window
+		if(timeTempSwitch(_condSwitch, currentTime, _value.temp)) {
+			currentStatus = CHECK_MOIST;
 		}
 	break;
 
-	/* purpose: Check moisture sensor */
-	case CHECK_MOIST:
+	case CHECK_MOIST:	// purpose: Check moisture sensor
 		if(_value.moisture < _condSwitch.moistureMin) {
-			if(startCallback) {
-				startCallback();
-			}
-			workStatus = WORK;
+			startCallback();
+			currentStatus = WORK;
 		}
 	break;
 
-	/* purpose: Wait till the end of workStatus */
-	case WORK:
+	case WORK:	// purpose: Wait till the end of currentStatus
 		if(_condSwitch.ctrlMode == LITRES) {
 			if(_value.wfVolume > _condSwitch.presetWf) {
-				if(endCallback) {
-					endCallback();
-				}
-				workStatus = NOT_READY;
+				endCallback();
+				currentStatus = NOT_READY;
 			}
 		} else {
-			if(currentTime > (_condSwitch.turnOnTime+_condSwitch.procesTime)) {
-				/* purpose: Terminate workStatus */
-				if(endCallback) {
-					endCallback();
-				}
-				workStatus = NOT_READY;
-			} else if(currentTime<_condSwitch.turnOnTime) {
-				if(  ( (((uint32_t)(24*60)*60)-_condSwitch.turnOnTime)+currentTime ) > (currentTime+_condSwitch.procesTime)  ) {
-					/* purpose: Terminate workStatus */
-					if(endCallback) {
-						endCallback();
-					}
-					workStatus = NOT_READY;
-				}
-			}
+			currentStatus =  timer(_condSwitch, currentTime, currentStatus);
 		}
 	break;
 
 	default:
-		if(endCallback) {
-			endCallback();
-		}
-		workStatus = NOT_READY;
+		endCallback();
+		currentStatus = NOT_READY;
 	}
-	return workStatus;
+	return currentStatus;
 }
 
 /*************************************************************************
- Function:	timerSwitch()
- Purpose:	lets user to set action which should be taken at indicated time
+ Function:	activateSwitch()
+ Purpose:
+ Input:
+ Notice:
+ **************************************************************************/
+status activateSwitch(uint8_t activate, status currentStatus) {
+	if(!endCallback) {
+		return NOT_READY;
+	}
+
+	static uint8_t activateHold = 0;
+	if(activateHold != activate) {
+		endCallback();
+		if(!activate) {
+			currentStatus = NOT_READY;
+		} else {
+			currentStatus = READY;
+		}
+	}
+	activateHold = activate;
+
+	return currentStatus;
+}
+
+/*************************************************************************
+ Function:	timeSwitch()
+ Purpose:	Checks time in order to take OFF/ ON action
  Input:		Global current time, Time to start, time from start till the end, start and finish
  Notice:	Time resolution: minutes
  **************************************************************************/
-uint8_t timerSwitch(uint32_t currentTime, uint32_t turnOnClock, uint32_t activeTime) {
-	if(!startCallback || !endCallback || !activeTime) {
+status timeSwitch(condSwitch _condSwitch, uint32_t currentTime, status currentStatus) {
+	if(!startCallback || !endCallback || !_condSwitch.procesTime) {
+		return currentStatus;
+	}
+
+	if( (currentTime >= _condSwitch.turnOnTime) && (currentStatus != WORK) ) {
+		startCallback();
+		currentStatus = WORK;
+	} else if(currentStatus != WORK) {
+		return currentStatus;
+	}
+
+	currentStatus = timer(_condSwitch, currentTime, currentStatus);
+
+	return currentStatus;
+}
+
+/*************************************************************************
+ Function:	timer()
+ Purpose:
+ Input:
+ Notice:
+ **************************************************************************/
+status timer(condSwitch _condSwitch, uint32_t currentTime, status currentStatus) {
+	if(!endCallback) {
+		return NOT_READY;
+	}
+
+	if(currentTime > (_condSwitch.turnOnTime+_condSwitch.procesTime)) {
+		endCallback();
+		currentStatus = NOT_READY;
+	} else if(currentTime<_condSwitch.turnOnTime) {
+		if(  ( (((uint32_t)(24*60)*60)-_condSwitch.turnOnTime)+currentTime ) > (currentTime+_condSwitch.procesTime)  ) {
+			endCallback();
+			currentStatus = NOT_READY;
+		}
+	}
+	return currentStatus;
+}
+
+/*************************************************************************
+ Function:	timeTempSwitch()
+ Purpose:
+ Input:
+ Notice:
+ **************************************************************************/
+uint8_t timeTempSwitch(condSwitch _condSwitch, uint32_t currentTime, uint32_t currentTemp) {
+	static uint32_t passedTime = 0;
+	static uint32_t savedTemperature = 0;
+	if(currentTime == _condSwitch.turnOnTime) {
+		savedTemperature =	currentTemp;
+	}
+	if(_condSwitch.turnOnTime <= currentTime) {
+		passedTime = currentTime - _condSwitch.turnOnTime;
+	} else {
+		passedTime = (  ((uint32_t)(24*60)*60) - _condSwitch.turnOnTime  ) + currentTime;
+	}
+	if(		(passedTime > ((_condSwitch.complexCheckTime) * 0.7f)) ||	// In case 70% of time passed but temperature didn't increase
+			(currentTemp > (savedTemperature + 100)) ) {				// Or in case if temperature increased by 1 Celsius
+		return 1;
+	} else {
 		return 0;
 	}
+}
 
-	static uint8_t isOn = 0;
-	if( (currentTime >= turnOnClock) && !isOn ) {
-		startCallback();
-		isOn= 1;
-	} else if(!isOn) {
-		return isOn;
-	}
-
-	static uint32_t passedTime = 0;
-	if(currentTime >= turnOnClock) {
-		passedTime = currentTime - turnOnClock;
+/*************************************************************************
+ Function:	checkComplexity()
+ Purpose:
+ Input:
+ Notice:
+ **************************************************************************/
+status checkComplexity(condSwitch _condSwitch) {
+	status currentStatus;
+	if(_condSwitch.complexMode & COMPLEX) {
+		currentStatus = CHECK_TIME_AND_TEMP;
+	} else if(_condSwitch.complexMode & HUMIDITY) {
+		currentStatus = CHECK_MOIST;
 	} else {
-		passedTime = ( (24*60)-turnOnClock ) + currentTime;
+		startCallback();
+		currentStatus = WORK;
 	}
-
-	if(passedTime >+ activeTime) {
-		endCallback();
-		isOn = 0;
-		passedTime = 0;
-	}
-	return isOn;
+	return currentStatus;
 }

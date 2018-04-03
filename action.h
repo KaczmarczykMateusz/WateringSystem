@@ -9,7 +9,14 @@
 #ifndef ACTION_H
 #define ACTION_H
 
-#include "main.h"
+#include <stdio.h>
+#include <avr/io.h>
+#include "uart.h"
+#include "dataParsing.h"
+#include "dataParsing.h"
+#include "clock.h"
+#include "lcd.h"
+
 
 // Outputs definitions
 #define RELAY_INIT 		DDRC |= (1<<PC0)
@@ -86,7 +93,7 @@ void uartWriteSensorData(TEMP *temperature, uint8_t light, uint8_t moistSenCount
  *  @param  *row2	: buffer with text coded in ASCII to be displayed at second row of LCD
  *  @return	None
  */
-void menuItem(char *row1, char *row2, time _time);
+void menuItem(char *row1, char *row2, time *_time);
 
 /** @brief	Print text, update global time and clear flags menu and RTC flags
  *  @param  None

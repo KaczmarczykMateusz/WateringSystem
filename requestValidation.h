@@ -14,16 +14,6 @@
 #include "lcd.h"
 #include "common.h"
 
-typedef enum _startAction {
-	WAIT			=	(1UL << 0),	//@brief: Wait until next day
-	ENABLE			=	(1UL << 1),	//@brief: Wait until time reaches set by user turn ON value
-	TURN_ON_TIME	=	(1UL << 2),	//@brief: Wait until increase of temperature or exceeding 70% of set by user time window
-	WAIT_TO_CONFIRM	=	(1UL << 3),	//@brief: Wait for confirmation from moisture sensor
-	EXECUTE			=	(1UL << 4),	//@brief: Execute action
-	IN_PROGRESS		=	(1UL << 5),	//@brief: Wait for condition terminating action
-	TERMINATE		=	(1UL << 6)	//@brief: Terminates action
-//	START_COUNTER	=	TURN_ON_TIME | WAIT_TO_CONFIRM	//@brief: Starts passed time counter
-}processValidation;
 
 /**	@brief:	Assign values from sensors to storage variables
  *	@param:	*_value	: Structure holding all real sensor values
@@ -82,6 +72,8 @@ void registerEndActionCallback(void (*endAction)(void));
  */
 status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentTime, uint8_t activate);
 
+status activateSwitch(uint8_t activate, status currentStatus);
+
 /**
  * @brief:	Feature enables user to set his own timer
  *			where he specifies turning ON and OFF time and actions
@@ -91,6 +83,12 @@ status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentT
  * @param:	activeTime		: Time to keep execution of "alarm" task ON as seconds
  * @return:	determine system state (work/ready)
  */
-uint8_t timerSwitch(uint32_t currentTime, uint32_t turnOnTime, uint32_t activeTime);
+status timeSwitch(condSwitch _condSwitch, uint32_t currentTime, status currentStatus);
+
+status timer(condSwitch _condSwitch, uint32_t currentTime, status currentStatus);
+
+uint8_t timeTempSwitch(condSwitch _condSwitch, uint32_t currentTime, uint32_t currentTemp);
+
+status checkComplexity(condSwitch _condSwitch);
 
 #endif

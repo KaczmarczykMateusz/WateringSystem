@@ -1,6 +1,5 @@
+//TODO: try to remove some "#include " from moistureSensor.h
 //TODO: implement powering of lcd from I/O via transistor
-	//TODO: delete include main.h from action.h
-//TODO: try to replace func from below with incrdcr fuction
 
 /*
  ============================================================================
@@ -13,20 +12,11 @@
 #include "main.h"
 #include <math.h>
 
-char* sysNotReadyBuff = "CZEKA";
-char* sysReadylBuff = "GOTOWY";
-char* sysWorkingBuff = "PRACA";
-char* litreCtrlTxt = "ltr";
-char* minuteCtrlTxt = "min";
-char* moistOnTxt = "TAK";
-char* moistOffTxt = "NIE";
-
-char* currCtrlBuff;
-char* currMoistCtrlBuff;
-char* currSysStatusBuff;
-
-
 int main(void) {
+	char* currCtrlBuff = '\0';
+	char* currMoistCtrlBuff = '\0';
+	char* currSysStatusBuff = '\0';
+
 	time global = initTime();
 	time turnOnTime = initTime();
 	time activeTime = initTime();
@@ -43,7 +33,7 @@ int main(void) {
 	uint8_t resetSecond = 0;
 	uint32_t timerTime = 0;
 
-	uint16_t blinkDelay;	//TODO: delete global definition
+	uint16_t blinkDelay;
 	uint8_t lightStrength = 0;
 
 	activateSystem = 0;
@@ -91,25 +81,7 @@ int main(void) {
 		}
 
 		uartCheck(parse_uart_data);
-
-		//TODO: move it to some function
-		if(  (controlFactor==MINUTES) && (currCtrlBuff!=minuteCtrlTxt)  ) {
-			currCtrlBuff= minuteCtrlTxt;
-		} else if(  (controlFactor==LITRES) && (currCtrlBuff!=litreCtrlTxt)  ) {
-			currCtrlBuff= litreCtrlTxt;
-		}
-		if(  (moistCtrl==MOIST_ON) && (currMoistCtrlBuff!=&moistOnTxt[0])  ) {
-			currMoistCtrlBuff= moistOnTxt;
-		} else if(  (moistCtrl==MOIST_OFF) && (currMoistCtrlBuff!=moistOffTxt)  ) {
-			currMoistCtrlBuff= moistOffTxt;
-		}
-		if(  (systemStatus==READY) && (currSysStatusBuff!=&sysReadylBuff[0])  ) {
-			currSysStatusBuff= sysReadylBuff;
-		} else if(  (systemStatus==WORK) && (currSysStatusBuff!=&sysWorkingBuff[0])  ) {
-			currSysStatusBuff= sysWorkingBuff;
-		}else if(  (systemStatus==NOT_READY) && (currSysStatusBuff!=&sysNotReadyBuff[0])  ) {
-			currSysStatusBuff= sysNotReadyBuff;
-		}
+		updateTexts(controlFactor, moistCtrl, systemStatus, &currCtrlBuff, &currMoistCtrlBuff, &currSysStatusBuff);
 
         if(  (SEC_CHANGED_CHECK) ) {
         	SEC_CHANGED_CLEAR;
@@ -144,7 +116,7 @@ int main(void) {
 			wfSensToggle(  ( (systemStatus==WORK)&&(controlFactor==LITRES) )? 1: 0  );
 
 			if(!setTimerFlag) {
-				printMainScreen(turnOnTime, timerTime, global, currMoistCtrlBuff, currSysStatusBuff);
+				printMainScreen(turnOnTime, timerTime, global, currMoistCtrlBuff, currCtrlBuff, currSysStatusBuff);
 			}
 #if 0	//TODO: probably we won't need it anymore but let's keep it until conditionalSwitch tested
         	if(controlFactor == MINUTES) {
@@ -178,12 +150,10 @@ int main(void) {
 #endif
         }
 
-
-
 //	****************** MENU ******************	//
         static uint8_t isBlink = 0;
 		if((BLINK_DELAY_FREQ/2) == blinkDelay--) {
-			printMainScreen(turnOnTime, timerTime, global, currMoistCtrlBuff, currSysStatusBuff);
+			printMainScreen(turnOnTime, timerTime, global, currMoistCtrlBuff, currCtrlBuff, currSysStatusBuff);
 		} else if((BLINK_DELAY_FREQ/2) > blinkDelay) {
 
 		} else if(BLINK_DELAY_FREQ < blinkDelay) {
@@ -319,13 +289,13 @@ void systemInit(void) {
 /*************************************************************************
  Function: 	printMainScreen()
  Purpose:	Prints basic screen
- Input	:	complexCheckTime - how long to wait from start tilll the end of workStatus
+ Input	:	timer - how long to wait from start tilll the end of workStatus
  	 	 	turnOnClock	-
  	 	 	globalClock
  **************************************************************************/
-void printMainScreen(time turnOnClock, uint32_t complexCheckTime, time globalClock, char* sysMoistStat, char* sysStat) {
+void printMainScreen(time turnOnClock, uint32_t timer, time globalClock, char* sysMoistStat,  char*  currCtrlBuff, char* sysStat) {
 	sprintf(firstRowBuffLCD,"%02d:%02d*%3ld%s*%s", turnOnClock.hour, turnOnClock.minute,
-													complexCheckTime, currCtrlBuff, sysMoistStat);
+													timer, currCtrlBuff, sysMoistStat); //TODO: pass wf instead of timer in case wf control
 	sprintf(secondRowBuffLCD,"%02d:%02d*%s", globalClock.hour, globalClock.minute, sysStat);
 	printSimpleScreen(firstRowBuffLCD, secondRowBuffLCD);
 }

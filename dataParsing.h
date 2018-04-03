@@ -11,6 +11,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "common.h"
 #include "uart.h"
 
 typedef struct{
@@ -33,6 +34,27 @@ void parse_uart_data(char *pBuf);
    @return  none
 */
 void sendInteger(uint16_t passedValue);
+
 uint8_t flipInteger(int8_t digit);
+
+/** @brief:	Update text buffers for display
+ *  @param:
+ */
+void updateTexts(control ctrlFactor, moistureCtrl mostCtrl, status sysStatus, char* (*ctrlBuff), char* (*moistCtrlBuff), char* (*sysStatusBuff));
+
+/** @brief: Update control text buffer
+ *  @param:
+ */
+void updateCtrlBuff(control ctrlFactor, char * (*ctrlFactorBuff));
+
+/** @brief: Update moisture text buffer
+ *  @param:
+ */
+void updateMoistBuff(moistureCtrl moistCtrl, char * (*moistCtrlBuff));
+
+/** @brief: Update system status text buffer
+ *  @param:
+ */
+void updateStatusBuff(status sysStatus, char * (*sysStatusBuff));
 
 #endif

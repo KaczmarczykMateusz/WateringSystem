@@ -13,6 +13,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <math.h>
+#include "common.h"
 
 
 #define THERM_DDR	DDRD
@@ -27,12 +28,6 @@
 #define ONEWIRE_IN			THERM_DDR	&= ~THERM_MASK
 
 uint8_t thermPad[8];
-
-typedef struct {
-	uint32_t tempInt;		// @brief Integer part of temperature result
-	uint32_t tempFract;		// @brief Fractional part of temperature result
-	uint32_t tempMultip;	// @brief temperature multiplied by (*100)
-} TEMP;
 
 /**
  * @brief	Reset sensor and return success or failure

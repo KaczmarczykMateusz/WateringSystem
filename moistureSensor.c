@@ -124,7 +124,7 @@ uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8
 #endif
 			sprintf(buff1, "SET MIN: %d%%", temporaryBoundry);
 			sprintf(bufferLCD, "Read: %d%% ->Next", actualMoist);
-			menuItem(buff1, bufferLCD, _globalTime);
+			menuItem(buff1, bufferLCD, &_globalTime);
 			moistSensMinOut = (temporaryBoundry * adcPercent) / 10;		// Convert into volts multiplied by 100
 		break;
 
@@ -135,7 +135,7 @@ uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8
 #endif
 			sprintf(buff1, "SET MAX: %d%%", temporaryBoundry);
 			sprintf(bufferLCD, "Read: %d%% ->Next", actualMoist);
-			menuItem(buff1, bufferLCD, _globalTime);
+			menuItem(buff1, bufferLCD, &_globalTime);
 			moistSensMaxOut = (temporaryBoundry * adcPercent) / 10;		// Convert into volts multiplied by 100
 		break;
 		default:

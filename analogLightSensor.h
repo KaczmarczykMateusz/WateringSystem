@@ -10,7 +10,8 @@
 #ifndef ANALOGLIGHTSENSOR_H_
 #define ANALOGLIGHTSENSOR_H_
 
-#include "adc.h"
+#include "common.h"
+
 #define LIGHT_SENS_MAX_OUT 400; // Maximum value which may be shown by sensor (drought) multiplied "*100" minus "-1"
 
 uint8_t lightAsPercent(void);

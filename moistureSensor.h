@@ -23,6 +23,7 @@
 #include "keyboard.h"
 #include "dataParsing.h"
 #include "action.h"
+#include "common.h"
 
 #define MOIST_SENSORS_NUMBER 2
 

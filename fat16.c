@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "fat16.h"
 
 uint8_t fat16_buffer[FAT16_BUFFER_SIZE];

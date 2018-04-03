@@ -14,25 +14,7 @@
 #include <stdlib.h>
 #include <avr/io.h>
 
-#include "keyboard.h"
-
-//  @brief  holding values  for ADC oversampling measurement
-typedef struct {
-	// @brief   set value in the middle (not precise) of measure range which can be pre-stepped down with voltage divider
-	uint16_t ref_adc;
-
-	// @brief   set value (volt) of ADC which set during measuring of ref_adc (multiply this value *100)
-	uint16_t ref_v;
-
-	// @brief   voltage multiplied by *100
-	uint16_t adcVoltRaw;
-
-	// @brief  	digits to print as ASCII char before coma (xx. full volts)
-	char beforeComa[3];
-
-	// @brief   digits to print as ASCII char before coma (.xx of volts)
-	char afterComa[3];
-} TVOLT;
+#include "common.h"
 
 /**
  * @brief    Initialise ADC converter with 10 bit (maximum for Atmega32) resolution

@@ -14,6 +14,7 @@
 #ifndef __FAT16_H
 #define __FAT16_H
 
+#include <stdio.h>
 #include <util/delay.h>
 #include "spi.h"
 #include "uart.h"
@@ -48,7 +49,7 @@ typedef struct {
     uint8_t end_chs[3];		//@brief: End of the partition in CHS-addressing
     uint32_t start_sector;	//@brief: Relative offset to the partition in sectors (LBA)
     uint32_t length_sectors;//@brief: size of the partition in sectors
-} __attribute((packed)) PartitionTable; // TODO: concern replacing "gcc_struct, __packed__" with only "packed"
+} __attribute__ ((__packed__)) PartitionTable; // TODO: concern replacing "gcc_struct, __packed__" with only "packed"
 
 //@brief: Partial FAT16 boot sector structure - non-essentials commented out
 typedef struct {
@@ -81,7 +82,7 @@ typedef struct {
     int8_t boot_code[448];		//@brief: Boot code (starts at offset 0x03e in FAT12/FAT16, and is 448 bytes)
     uint16_t boot_sector_signature;	//@brief: Must be 0x55AA
 #endif
-} __attribute((packed)) Fat16BootSectorFragment;
+} __attribute__ ((__packed__)) Fat16BootSectorFragment;
 
 //@brief: FAT16 file entry
 typedef struct {
@@ -93,7 +94,7 @@ typedef struct {
     uint16_t modify_date;	//@brief: Date file was modified last time
     uint16_t starting_cluster;	//@brief: Offset of starting cluster
     uint32_t file_size;		//@brief: Total size of file as bytes
-} __attribute((packed)) Fat16Entry;
+} __attribute__ ((__packed__)) Fat16Entry;
 
 //@brief: State data required by FAT16 library
 typedef struct {
@@ -103,7 +104,7 @@ typedef struct {
    uint16_t cluster; 		//@brief: Current cluster being read
    uint32_t cluster_left;	//@brief: Bytes left in current cluster
    uint32_t file_left;		//@brief:: Bytes left in the file being read
-} __attribute((packed)) Fat16State;
+} __attribute__ ((__packed__)) Fat16State;
 
 
 //@brief: Global variables for read data and library state

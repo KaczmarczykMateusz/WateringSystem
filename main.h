@@ -32,7 +32,6 @@
 #include "common.h"
 
 static const uint16_t BLINK_DELAY_FREQ = 35000;
-uint16_t blinkDelay;
 
 TEMP temp;
 
@@ -55,12 +54,12 @@ void exitServiceMode(void);
  * 			need for work of the system
  */
 void systemInit(void);
-void printMainScreen(time turnOnClock, uint32_t activeTime, time globalClock, char* sysMoistStat, char* sysStat);
+void printMainScreen(time turnOnClock, uint32_t complexCheckTime, time globalClock, char* sysMoistStat,  char*  currCtrlBuff, char* sysStat);
 void controlMode(void);
 
 void toggleCtrl(void);
 void toggleHumidityCtrl(void);
 void activDeactivSystem(void);
-TEMP readTemp(void) ;
+TEMP readTemp(void);
 
 #endif

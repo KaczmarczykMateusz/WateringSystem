@@ -8,7 +8,6 @@
  */
 #include "action.h"
 
-
 // Outputs definitions
 #define RELAY_INIT 		DDRC |= (1<<PC0)
 #define RELAY_ON    	PORTC &= ~(1<<PC0)
@@ -167,7 +166,7 @@ void serviceModeEntry(void) {
  Purpose: Print text, update global time and clear flags menu and RTC flags
  Input:	Two rows of text as max 16 char arrays (each one)
  **************************************************************************/
-void menuItem(char *row1, char *row2, time _time) {
+void menuItem(char *row1, char *row2, time *_time) {
 	lockMainScreen = 1;
 
 	if(	(INPUT_MODIFIED_CHECK) ||
@@ -175,8 +174,8 @@ void menuItem(char *row1, char *row2, time _time) {
 		printSimpleScreen(row1, row2);
 		INPUT_MODIFIED_CLEAR;
 		SEC_CHANGED_CLEAR;
-		_time.second = second;
-		timeDivision(&_time);
+		_time->second = second;
+		timeDivision(_time);
 	}
 }
 

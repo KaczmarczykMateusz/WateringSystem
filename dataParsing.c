@@ -8,6 +8,18 @@
  */
 #include "dataParsing.h"
 
+static const char* sysNotReadyBuff = "CZEKA";
+static const char* sysReadylBuff = "GOTOWY";
+static const char* sysWorkingBuff = "PRACA";
+static const char* sysCheckTimeTempBuff = "OPOZN";
+static const char* sysCheckMoistBuff = "WILG";
+
+static const char* litreCtrlTxt = "ltr";
+static const char* minuteCtrlTxt = "min";
+
+static const char* moistOnTxt = "TAK";
+static const char* moistOffTxt = "NIE";
+
 /*************************************************************************
 Function: parse_uart_data(char * pBuf)
 Purpose:  Combine bytes into string and check them for "enter" token.
@@ -84,5 +96,61 @@ uint8_t flipInteger(int8_t digit) {
 		return (uint8_t) digit;
 	} else {
 		return 100;
+	}
+}
+
+/*************************************************************************
+ Function: updateTexts()
+ Purpose: Fill all control text buffers for LCD at once
+ Input: Control factor enums and text buffers
+ **************************************************************************/
+void updateTexts(control ctrlFactor, moistureCtrl mostCtrl, status sysStatus, char* (*ctrlBuff), char* (*moistCtrlBuff), char* (*sysStatusBuff)) {
+	updateCtrlBuff(ctrlFactor, ctrlBuff);
+	updateMoistBuff(mostCtrl, moistCtrlBuff);
+	updateStatusBuff(sysStatus, sysStatusBuff);
+}
+
+/*************************************************************************
+ Function: updateCtrlBuff()
+ Purpose: Fill control text buffers for LCD at once
+ Input: Control factor enum and text buffer
+ **************************************************************************/
+void updateCtrlBuff(control ctrlFactor, char * (*ctrlFactorBuff)) {
+	if(  (ctrlFactor==MINUTES) && (*ctrlFactorBuff!=minuteCtrlTxt)  ) {
+		*ctrlFactorBuff= (char*)minuteCtrlTxt;
+	} else if(  (ctrlFactor==LITRES) && (*ctrlFactorBuff!=litreCtrlTxt)  ) {
+		*ctrlFactorBuff= (char*)litreCtrlTxt;
+	}
+}
+
+/*************************************************************************
+ Function: updateMoistBuff()
+ Purpose: Fill control text buffers for LCD at once
+ Input: Control factor enum and text buffer
+ **************************************************************************/
+void updateMoistBuff(moistureCtrl moistCtrl, char * (*moistCtrlBuff)) {
+	if(  (moistCtrl==MOIST_ON) && (*moistCtrlBuff!=&moistOnTxt[0])  ) {
+		*moistCtrlBuff= (char*)moistOnTxt;
+	} else if(  (moistCtrl==MOIST_OFF) && (*moistCtrlBuff!=moistOffTxt)  ) {
+		*moistCtrlBuff= (char*)moistOffTxt;
+	}
+}
+
+/*************************************************************************
+ Function: updateStatusBuff()
+ Purpose: Fill control text buffers for LCD at once
+ Input: Control factor enum and text buffer
+ **************************************************************************/
+void updateStatusBuff(status sysStatus, char * (*sysStatusBuff)) {
+	if(  (sysStatus==READY) && (*sysStatusBuff!=&sysReadylBuff[0])  ) {
+		*sysStatusBuff= (char*)sysReadylBuff;
+	} else if(  (sysStatus==WORK) && (*sysStatusBuff!=&sysWorkingBuff[0])  ) {
+		*sysStatusBuff= (char*)sysWorkingBuff;
+	} else if(  (sysStatus==NOT_READY) && (*sysStatusBuff!=&sysNotReadyBuff[0])  ) {
+		*sysStatusBuff= (char*)sysNotReadyBuff;
+	} else if(  (sysStatus==CHECK_TIME_AND_TEMP) && (*sysStatusBuff!=&sysCheckTimeTempBuff[0])  ) {
+		*sysStatusBuff= (char*)sysCheckTimeTempBuff;
+	} else if(  (sysStatus==CHECK_MOIST) && (*sysStatusBuff!=&sysCheckMoistBuff[0])  ) {
+		*sysStatusBuff= (char*)sysCheckMoistBuff;
 	}
 }

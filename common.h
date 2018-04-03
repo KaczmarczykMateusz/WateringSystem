@@ -8,6 +8,32 @@
  */
 #ifndef __COMMON_H
 #define __COMMON_H
+#include <stdint.h>
+
+
+//  @brief  holding values  for ADC oversampling measurement
+typedef struct {
+	// @brief   set value in the middle (not precise) of measure range which can be pre-stepped down with voltage divider
+	uint16_t ref_adc;
+
+	// @brief   set value (volt) of ADC which set during measuring of ref_adc (multiply this value *100)
+	uint16_t ref_v;
+
+	// @brief   voltage multiplied by *100
+	uint16_t adcVoltRaw;
+
+	// @brief  	digits to print as ASCII char before coma (xx. full volts)
+	char beforeComa[3];
+
+	// @brief   digits to print as ASCII char before coma (.xx of volts)
+	char afterComa[3];
+} TVOLT;
+
+typedef struct {
+	uint32_t tempInt;		// @brief Integer part of temperature result
+	uint32_t tempFract;		// @brief Fractional part of temperature result
+	uint32_t tempMultip;	// @brief temperature multiplied by (*100)
+} TEMP;
 
 typedef enum {
 	MINUTES,
