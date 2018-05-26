@@ -314,8 +314,8 @@ void SD_read(uint32_t sector, uint16_t offset, uint8_t *buffer, uint16_t length)
 uint8_t SD_command(uint8_t cmd, uint32_t arg, uint8_t crc, uint8_t read) {
 	uint8_t i, buffer[32], ret = 0xFF;
 
-	uartPuts("CMD ");
-	uwrite_hex(cmd);
+	uartTxStr("CMD ");
+	uartTxHex(cmd);
 
 	CS_ENABLE();
 	SPI_write(cmd);
@@ -332,14 +332,14 @@ uint8_t SD_command(uint8_t cmd, uint32_t arg, uint8_t crc, uint8_t read) {
 	CS_DISABLE();
 
 	for(i=0; i<read; i++) {
-		uartPutc(' ');
-		uwrite_hex(buffer[i]);
+		uartTxChar(' ');
+		uartTxHex(buffer[i]);
 		if(buffer[i] != 0xFF) {
 			ret = buffer[i];
 		}
 	}
 
-	uartPuts("\r\n");
+	uartTxStr("\r\n");
 
 	return ret;
 }

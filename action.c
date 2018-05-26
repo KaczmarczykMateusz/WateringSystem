@@ -71,20 +71,20 @@ void outAlarm(void) {
  **************************************************************************/
 void uartWriteCurrTime(time currTime) {
 	if(currTime.hour < 10) {
-		uartPuts("0");
+		uartTxStr("0");
 	}
-	sendInteger(currTime.hour);
-	uartPuts(":");
+	uartTxInt(currTime.hour);
+	uartTxStr(":");
 	if(currTime.minute < 10) {
-		uartPuts("0");
+		uartTxStr("0");
 	}
-	sendInteger(currTime.minute);
-	uartPuts(":");
+	uartTxInt(currTime.minute);
+	uartTxStr(":");
 
 	if(currTime.second < 10) {
-		uartPuts("0");
+		uartTxStr("0");
 	}
-	sendInteger(currTime.second);
+	uartTxInt(currTime.second);
 }
 
 /*************************************************************************
@@ -93,11 +93,11 @@ void uartWriteCurrTime(time currTime) {
  Purpose:	Send temperature read from single person read via UART  to console
  **************************************************************************/
 void uartWriteTemp(TEMP * temperature) {
-	uartPuts("Temp. ");
-	sendInteger(temperature->tempInt);
-	uartPuts(".");
-	sendInteger(temperature->tempFract);
-	uartPuts("*C");
+	uartTxStr("Temp. ");
+	uartTxInt(temperature->tempInt);
+	uartTxStr(".");
+	uartTxInt(temperature->tempFract);
+	uartTxStr("*C");
 }
 
 /*************************************************************************
@@ -106,9 +106,9 @@ void uartWriteTemp(TEMP * temperature) {
  Purpose:	Send input data via UART  to console
  **************************************************************************/
 void uartWriteLight(uint8_t percent) {
-	uartPuts("Light: ");
-	sendInteger(percent);
-	uartPuts("%");
+	uartTxStr("Light: ");
+	uartTxInt(percent);
+	uartTxStr("%");
 }
 
 /*************************************************************************
@@ -121,7 +121,7 @@ void uartWriteMoisture(uint8_t sensorCount, uint8_t *percent) {
 	char moistString[30];
 	for(uint8_t i=0; i < sensorCount; i++) {
 		sprintf(moistString, "Moisture sensor No.%d: %d%%\n\r", i, percent[i]);
-		uartPuts(moistString);
+		uartTxStr(moistString);
 	}
 }
 
@@ -131,8 +131,8 @@ void uartWriteMoisture(uint8_t sensorCount, uint8_t *percent) {
  Purpose:	Send input data via UART  to console
  **************************************************************************/
 void uartWriteWaterflow(uint32_t perMinute, uint32_t accumulated) {
-		sendInteger(accumulated);
-		sendInteger(perMinute);
+		uartTxInt(accumulated);
+		uartTxInt(perMinute);
 }
 
 /*************************************************************************

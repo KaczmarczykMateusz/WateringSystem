@@ -8,10 +8,10 @@
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <avr/pgmspace.h>
 #include <util/atomic.h>
 #include "uart.h"
 
+#include <stdlib.h>
 // size of RX/TX buffers
 #define UART_RX_BUFFER_MASK (UART_RX_BUFFER_SIZE - 1)
 #define UART_TX_BUFFER_MASK (UART_TX_BUFFER_SIZE - 1)
@@ -162,13 +162,12 @@ uint16_t uartPeek(void) {
 }
 
 /*************************************************************************
- Function: uartPutc()
+ Function: uartTxChar()
  Purpose:  write byte to circular buffer for transmitting via UART
  Input:    byte to be transmitted
  Returns:  none
  **************************************************************************/
-void uartPutc(uint8_t data) {
-
+void uartTxChar(uint8_t data) {
 	uint16_t tmpHead;
 
 	tmpHead = (UART_TxHead + 1) & UART_TX_BUFFER_MASK;
@@ -185,28 +184,45 @@ void uartPutc(uint8_t data) {
 }
 
 /*************************************************************************
- Function: uartPuts()
+Function: uartTxHex()
+Purpose: transmit hex as hex to UART
+Input:	hex digit
+Returns:  None
+**************************************************************************/
+void uartTxHex(uint8_t n) {
+	if(((n>>4) & 15) < 10)
+		uartTxChar('0' + ((n>>4)&15));
+	else
+		uartTxChar('A' + ((n>>4)&15) - 10);
+	n <<= 4;
+	if(((n>>4) & 15) < 10)
+		uartTxChar('0' + ((n>>4)&15));
+	else
+		uartTxChar('A' + ((n>>4)&15) - 10);
+}
+
+/*************************************************************************
+Function: uartTxInt(toChar passed)
+Purpose:  Sends integer decoded as char
+		  For use with user interface
+Input:	  Digit to send, not larger than 999
+Returns:  None
+**************************************************************************/
+void uartTxInt(uint32_t passedValue) {
+	char stringToPass[] = "";
+	ltoa(passedValue,stringToPass, 10);
+	uartTxStr(stringToPass);
+}
+
+/*************************************************************************
+ Function: uartTxStr()
  Purpose:  transmit string to UART
  Input:    string to be transmitted
  Returns:  none
  **************************************************************************/
-void uartPuts(const char *s) {
+void uartTxStr(const char *s) {
 	while (*s) {
-		uartPutc(*s++);
-	}
-}
-
-/*************************************************************************
- Function: uartPuts_p()
- Purpose:  transmit string from program memory to UART
- Input:    program memory string to be transmitted
- Returns:  none
- **************************************************************************/
-void uartPuts_p(const char *progmem_s) {
-	register char c;
-
-	while ((c = pgm_read_byte(progmem_s++))) {
-		uartPutc(c);
+		uartTxChar(*s++);
 	}
 }
 
@@ -264,17 +280,4 @@ void uartCheck (void (*action)(char *pBuf)) {
 			action((char*)receiveBufor);
 		}
 	}
-}
-
-//TODO: check if function is working
-void uwrite_hex(unsigned char n) {
-	if(((n>>4) & 15) < 10)
-		uartPutc('0' + ((n>>4)&15));
-	else
-		uartPutc('A' + ((n>>4)&15) - 10);
-	n <<= 4;
-	if(((n>>4) & 15) < 10)
-		uartPutc('0' + ((n>>4)&15));
-	else
-		uartPutc('A' + ((n>>4)&15) - 10);
 }

@@ -28,13 +28,6 @@ typedef struct{
 */
 void parse_uart_data(char *pBuf);
 
-/**
-   @brief   TODO
-   @param
-   @return  none
-*/
-void sendInteger(uint16_t passedValue);
-
 uint8_t flipInteger(int8_t digit);
 
 /** @brief:	Update text buffers for display
