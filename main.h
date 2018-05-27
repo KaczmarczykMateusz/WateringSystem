@@ -30,6 +30,7 @@
 #include "spi.h"
 #include "fat16.h"
 #include "common.h"
+#include "logger/logger.h"
 
 static const uint16_t BLINK_DELAY_FREQ = 35000;
 

@@ -116,7 +116,7 @@ status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentT
 		if(_condSwitch.ctrlMode == LITRES) {
 			if(_value.wfVolume > _condSwitch.presetWf) {
 				endCallback();
-				currentStatus = NOT_READY;
+				currentStatus = NOT_READY; //TODO: change it to READY !!!!!
 			}
 		} else {
 			currentStatus =  timer(_condSwitch, currentTime, currentStatus);
@@ -141,7 +141,7 @@ status activateSwitch(uint8_t activate, status currentStatus) {
 		return NOT_READY;
 	}
 
-	static uint8_t activateHold = 0;
+	static uint8_t activateHold = NOT_READY;
 	if(activateHold != activate) {
 		endCallback();
 		if(!activate) {

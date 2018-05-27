@@ -16,6 +16,7 @@
 #include "dataParsing.h"
 #include "clock.h"
 #include "lcd.h"
+#include "common.h"
 
 
 // Outputs definitions

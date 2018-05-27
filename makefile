@@ -93,8 +93,11 @@ analogLightSensor.c \
 uart.c \
 dataParsing.c \
 action.c \
-fat16.h \
-spi.h
+fat16.c \
+spi.c \
+pff.c \
+mmc.c \
+loger.c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)

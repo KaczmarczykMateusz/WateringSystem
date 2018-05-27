@@ -4,7 +4,7 @@
  Author      : Mateusz Kaczmarczyk
  Version     : Atmel AVR Atmega8
 			   External quartz 16MHz
- Description : Waterflow sensor YF-S201
+ Description : Waterflow sensor YF-S201 connected to ICP1 PIN
  ============================================================================
  */
 #include <avr/io.h>
