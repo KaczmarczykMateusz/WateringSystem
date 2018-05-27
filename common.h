@@ -40,6 +40,7 @@ typedef enum {
 	LITRES
 } control;
 
+//@Brief: SYSTEM_STATUS_FLAGS
  typedef enum {
  	NOT_READY			=	(1UL << 0),	//@brief: Won't seek for executing action
  	READY				=	(1UL << 1),	//@brief: Wait until time reaches set by user turn ON value
@@ -94,7 +95,7 @@ typedef enum {
  	//@brief: Holds value for complexity of watering system validation check
  	complexity complexMode;
  	//@brief: Determines terminating of workStatus by; litres/ minutes
- 	control ctrlMode;
+ 	control ctrlFactor;
  }condSwitch;
 
 #endif

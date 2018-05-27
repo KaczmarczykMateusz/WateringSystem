@@ -87,3 +87,13 @@ void voltAdc(uint16_t adc, TVOLT * voltage) {
 	voltage->afterComa[2] = '0';
 	voltage->afterComa[2] = '0';
 }
+
+TVOLT initAdcStruct(uint16_t refV, uint16_t refAdcVal) {
+	TVOLT tempAdc;
+	tempAdc.adcVoltRaw = 0;
+	tempAdc.afterComa[0] = '\0';
+	tempAdc.beforeComa[0] = '\0';
+	tempAdc.ref_adc = refAdcVal;
+	tempAdc.ref_v = refV;
+	return tempAdc;
+}

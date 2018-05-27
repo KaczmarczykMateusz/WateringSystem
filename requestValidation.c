@@ -76,8 +76,9 @@ condSwitch updateConditionalSwitch(uint32_t turnOnTime, uint32_t complexCheckTim
 
 /*************************************************************************
  Function: 	conditionalSwitch()
- Purpose:	Check when to start/ stop defined currentStatus (by default: watering)
+ Purpose:	Check when to start/ stop defined newStatus (by default: watering)
  Input:    	CurrentTime 	: Current time converted to seconds
+ 	 	 	activate: value of SYSTEM_STATUS_FLAGS
  See: 		resolution: seconds
  **************************************************************************/
 status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentTime, uint8_t activate) {
@@ -85,49 +86,54 @@ status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentT
 		return NOT_READY;
 	}
 
-	static status currentStatus = NOT_READY;
-	currentStatus = activateSwitch(activate, currentStatus);
+	static status newStatus = NOT_READY;
+	newStatus = activateSwitch(activate, newStatus);
 
-	switch(currentStatus) {
+	switch(newStatus) {
 
 	case NOT_READY:	// purpose: don't perform check before switch activated
 	break;
 
 	case READY:	// purpose: Wait until time reaches set by user turn ON value
 		if(currentTime >= _condSwitch.turnOnTime) {
-			currentStatus = checkComplexity(_condSwitch);
+			if(!actionExecuted) {
+				newStatus = checkComplexity(_condSwitch);
+				actionExecuted = 1;
+			}
+		} else {
+			actionExecuted = 0;
 		}
 	break;
 
 	case CHECK_TIME_AND_TEMP:	// purpose: Wait until increase of temperature or exceeding 70% of set by user time window
 		if(timeTempSwitch(_condSwitch, currentTime, _value.temp)) {
-			currentStatus = CHECK_MOIST;
+			newStatus = CHECK_MOIST;
 		}
 	break;
 
 	case CHECK_MOIST:	// purpose: Check moisture sensor
 		if(_value.moisture < _condSwitch.moistureMin) {
 			startCallback();
-			currentStatus = WORK;
+			newStatus = WORK;
 		}
 	break;
 
-	case WORK:	// purpose: Wait till the end of currentStatus
-		if(_condSwitch.ctrlMode == LITRES) {
-			if(_value.wfVolume > _condSwitch.presetWf) {
+	case WORK:	// purpose: Wait till the end of newStatus
+		if(_condSwitch.ctrlFactor == LITRES) {
+			if(_value.wfVolume >= _condSwitch.presetWf) {
 				endCallback();
-				currentStatus = NOT_READY; //TODO: change it to READY !!!!!
+				newStatus = READY;
 			}
 		} else {
-			currentStatus =  timer(_condSwitch, currentTime, currentStatus);
+			newStatus =  terminatingTimer(_condSwitch, currentTime, newStatus);
 		}
 	break;
 
 	default:
 		endCallback();
-		currentStatus = NOT_READY;
+		newStatus = NOT_READY;
 	}
-	return currentStatus;
+	return newStatus;
 }
 
 /*************************************************************************
@@ -173,29 +179,28 @@ status timeSwitch(condSwitch _condSwitch, uint32_t currentTime, status currentSt
 		return currentStatus;
 	}
 
-	currentStatus = timer(_condSwitch, currentTime, currentStatus);
+	currentStatus = terminatingTimer(_condSwitch, currentTime, currentStatus);
 
 	return currentStatus;
 }
 
 /*************************************************************************
- Function:	timer()
+ Function:	terminatingTimer()
  Purpose:
  Input:
  Notice:
  **************************************************************************/
-status timer(condSwitch _condSwitch, uint32_t currentTime, status currentStatus) {
+status terminatingTimer(condSwitch _condSwitch, uint32_t currentTime, status currentStatus) {
 	if(!endCallback) {
 		return NOT_READY;
 	}
-
 	if(currentTime > (_condSwitch.turnOnTime+_condSwitch.procesTime)) {
 		endCallback();
-		currentStatus = NOT_READY;
+		currentStatus = READY;
 	} else if(currentTime<_condSwitch.turnOnTime) {
 		if(  ( (((uint32_t)(24*60)*60)-_condSwitch.turnOnTime)+currentTime ) > (currentTime+_condSwitch.procesTime)  ) {
 			endCallback();
-			currentStatus = NOT_READY;
+			currentStatus = READY;
 		}
 	}
 	return currentStatus;

@@ -46,4 +46,6 @@ uint16_t _adcConvert(uint8_t channel);
  */
 uint16_t adcOversample(uint8_t channel, uint8_t extend);
 
+TVOLT initAdcStruct(uint16_t refV, uint16_t refAdcVal);
+
 #endif

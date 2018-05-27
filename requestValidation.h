@@ -14,6 +14,7 @@
 #include "lcd.h"
 #include "common.h"
 
+uint8_t actionExecuted;
 
 /**	@brief:	Assign values from sensors to storage variables
  *	@param:	*_value	: Structure holding all real sensor values
@@ -75,7 +76,7 @@ status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentT
 status activateSwitch(uint8_t activate, status currentStatus);
 
 /**
- * @brief:	Feature enables user to set his own timer
+ * @brief:	Feature enables user to set his own terminatingTimer
  *			where he specifies turning ON and OFF time and actions
  *			triggered at indicated time
  * @param:	currentTime		: Current time as seconds
@@ -85,7 +86,7 @@ status activateSwitch(uint8_t activate, status currentStatus);
  */
 status timeSwitch(condSwitch _condSwitch, uint32_t currentTime, status currentStatus);
 
-status timer(condSwitch _condSwitch, uint32_t currentTime, status currentStatus);
+status terminatingTimer(condSwitch _condSwitch, uint32_t currentTime, status currentStatus);
 
 uint8_t timeTempSwitch(condSwitch _condSwitch, uint32_t currentTime, uint32_t currentTemp);
 

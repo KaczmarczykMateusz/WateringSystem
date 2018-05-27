@@ -36,7 +36,7 @@ void wfSensToggle(uint8_t enable);
 /**
  * @brief:	Measure water flow using data captured from timer and ISR
  * @param:	None
- * @return:	Water flow as centilitres per minute [cl/minute] (1[cl] = 0.01[l])
+ * @return:	Water flow as [ml/minute]
  */
 uint16_t measureWF(void);
 

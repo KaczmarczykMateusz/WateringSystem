@@ -45,6 +45,7 @@ void wfSensToggle(uint8_t enable) {
 
 	if(	(TCNT1 > 60000) &&					//Prevent from stopping in dead point while pump stopped
 		(wfStatus & WF_COUNT_STARTED)) {	//only in case if wf sensor captured some flow already otherwise do nothing
+		wfStatus &= ~WF_COUNT_STARTED;
 		TCCR1B &= ~(1<<CS12) & ~(1<<CS11) & ~(1<<CS12);	// Stop timer1 clearing prescalers
 		wfStatus &= ~WF_COUNT_RUNNING;						// Let timer1 to restart
 	}
@@ -63,11 +64,10 @@ void wfSensToggle(uint8_t enable) {
 /*************************************************************************
  Function:	measureWF()
  Purpose:	Measure water flow using data captured from timer and ISR
- Returns:	Water flow as centilitres per minute [cl/minute] (1[cl] = 0.01[l])
+ Returns:	Water flow as [ml/minute]
  **************************************************************************/
 uint16_t measureWF(void) {
-	if(	(wfStatus & WF_COUNT_RUNNING) ||
-		(!timerVal)) {	// Prevent from stopping and reading timer while it's  running
+	if(!timerVal) {
 		return 0;
 	}
 
@@ -78,11 +78,11 @@ uint16_t measureWF(void) {
 	wf = ((65536.0f / timerVal) * wf) * (65536 / 62500.0f); //Result as Hz
 
 	//Pattern: (Frequency x 60) / 7.5Q(constant), = (flow rate [l]/h litres per hour)
-	//(Frequency x 60000) / 75Q(constant), = (flow rate [cl/h] centilitres per hour)
+	//(Frequency x 60000) / 75Q(constant), = (flow rate  per hour)
 	wf = (wf * 60000) / 75;
 
 	timerVal = 0;
 
 
-	return (uint16_t)round(wf/60); // Return centilitres per minute [cl/minute] (1[cl] = 0.01[l])
+	return (uint16_t)round(wf/6); // Return [ml/minute]
 }

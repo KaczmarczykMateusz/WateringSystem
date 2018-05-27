@@ -112,9 +112,9 @@ void alarmToggle(void);
  */
 void exitServiceMode(void);
 
-/** @brief  Write to HD44780 data half byte by half byte while in 4 bit interface mode
- *  @param  older half of byte to send
+/** @brief
+ *  @param
  */
-void incrDigit(void);
+void menuIncr(void);
 
 #endif

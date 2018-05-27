@@ -188,9 +188,9 @@ void exitServiceMode(void) {
 }
 
 /*************************************************************************
- Function: 	incrDigit()
+ Function: 	menuIncr()
  Purpose:
  **************************************************************************/
-void incrDigit(void) {
+void menuIncr(void) {
 	setTimerFlag++;
 }

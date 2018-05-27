@@ -42,7 +42,7 @@ char firstRowBuffLCD[17];
 char secondRowBuffLCD[17];
 
 
-uint8_t activateSystem;
+status activateSystem;
 
 control controlFactor;
 moistureCtrl moistCtrl;
@@ -62,5 +62,8 @@ void toggleCtrl(void);
 void toggleHumidityCtrl(void);
 void activDeactivSystem(void);
 TEMP readTemp(void);
+
+value initSensVal();
+condSwitch initCondSwitch();
 
 #endif

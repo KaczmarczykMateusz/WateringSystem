@@ -17,6 +17,10 @@
 #include "clock.h"
 
 //	@brief Buttons masks definitions
+#define BUTTON_DDR DDRD
+#define BUTTON_PORT PORTD
+#define BUTTON_PIN PIND
+
 #define SELECT_BTN_MASK (1<<PD5)
 #define STOP_BTN_MASK 	(1<<PD4)
 

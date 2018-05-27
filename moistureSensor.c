@@ -99,7 +99,7 @@ uint8_t moistCheckResult(uint8_t isPowered, TVOLT *mSens, uint8_t *sensNo) {
 }
 
 
-
+#if 0	//Consider to implement something simillar
 // ******************** SERVICE MODE ***************** //
 /*************************************************************************
  Function: calibrateMoistSensor()
@@ -145,3 +145,4 @@ uint8_t calibrateMoistSensor(uint8_t enableServiceMode, uint8_t menuIndex, uint8
 	}
 	return 1;
 }
+#endif
