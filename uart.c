@@ -205,11 +205,10 @@ void uartTxHex(uint8_t n) {
 Function: uartTxInt(toChar passed)
 Purpose:  Sends integer decoded as char
 		  For use with user interface
-Input:	  Digit to send, not larger than 999
-Returns:  None
+Input:	  Digit to send, not larger than 999 999 999
 **************************************************************************/
 void uartTxInt(uint32_t passedValue) {
-	char stringToPass[] = "";
+	char stringToPass[10+1] = "";
 	ltoa(passedValue,stringToPass, 10);
 	uartTxStr(stringToPass);
 }
