@@ -43,7 +43,7 @@ void updateCtrlBuff(control ctrlFactor, char * (*ctrlFactorBuff));
 /** @brief: Update moisture text buffer
  *  @param:
  */
-void updateMoistBuff(moistureCtrl moistCtrl, char * (*moistCtrlBuff));
+void updateMoistBuff(uint8_t minMoist, char * (*moistCtrlBuff));
 
 /** @brief: Update system status text buffer
  *  @param:

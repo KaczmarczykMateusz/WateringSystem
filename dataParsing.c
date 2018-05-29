@@ -8,16 +8,15 @@
  */
 #include "dataParsing.h"
 
+#include <stdio.h>
 static const char* sysNotReadyBuff = "CZEKA";
 static const char* sysReadylBuff = "GOTOWY";
 static const char* sysWorkingBuff = "PRACA";
-static const char* sysCheckTimeTempBuff = "OPOZN";
 static const char* sysCheckMoistBuff = "WILG";
 
 static const char* litreCtrlTxt = "ltr";
 static const char* minuteCtrlTxt = "min";
 
-static const char* moistOnTxt = "TAK";
 static const char* moistOffTxt = "NIE";
 
 /*************************************************************************
@@ -76,9 +75,9 @@ uint8_t flipInteger(int8_t digit) {
  Purpose: Fill all control text buffers for LCD at once
  Input: Control factor enums and text buffers
  **************************************************************************/
-void updateTexts(control ctrlFactor, moistureCtrl mostCtrl, status sysStatus, char* (*ctrlBuff), char* (*moistCtrlBuff), char* (*sysStatusBuff)) {
+void updateTexts(control ctrlFactor, uint8_t minMoist, status sysStatus, char* (*ctrlBuff), char* (*moistCtrlBuff), char* (*sysStatusBuff)) {
 	updateCtrlBuff(ctrlFactor, ctrlBuff);
-	updateMoistBuff(mostCtrl, moistCtrlBuff);
+	updateMoistBuff(minMoist, moistCtrlBuff);
 	updateStatusBuff(sysStatus, sysStatusBuff);
 }
 
@@ -100,11 +99,16 @@ void updateCtrlBuff(control ctrlFactor, char * (*ctrlFactorBuff)) {
  Purpose: Fill control text buffers for LCD at once
  Input: Control factor enum and text buffer
  **************************************************************************/
-void updateMoistBuff(moistureCtrl moistCtrl, char * (*moistCtrlBuff)) {
-	if(  (moistCtrl==MOIST_ON) && (*moistCtrlBuff!=&moistOnTxt[0])  ) {
-		*moistCtrlBuff= (char*)moistOnTxt;
-	} else if(  (moistCtrl==MOIST_OFF) && (*moistCtrlBuff!=moistOffTxt)  ) {
+void updateMoistBuff(uint8_t minMoist, char * (*moistCtrlBuff)) {
+	static uint8_t updated = 0;
+	static uint8_t minMoistHold = 0;
+	if(  minMoist && (!updated|| (minMoistHold!=minMoist))) {
+		sprintf(*moistCtrlBuff, "%d", minMoist);
+		updated = 1;
+		minMoistHold = minMoist;
+	} else if(  (!minMoist) && (*moistCtrlBuff!=moistOffTxt)  ) {
 		*moistCtrlBuff= (char*)moistOffTxt;
+		updated = 0;
 	}
 }
 
@@ -120,8 +124,6 @@ void updateStatusBuff(status sysStatus, char * (*sysStatusBuff)) {
 		*sysStatusBuff= (char*)sysWorkingBuff;
 	} else if(  (sysStatus==NOT_READY) && (*sysStatusBuff!=&sysNotReadyBuff[0])  ) {
 		*sysStatusBuff= (char*)sysNotReadyBuff;
-	} else if(  (sysStatus==CHECK_TIME_AND_TEMP) && (*sysStatusBuff!=&sysCheckTimeTempBuff[0])  ) {
-		*sysStatusBuff= (char*)sysCheckTimeTempBuff;
 	} else if(  (sysStatus==CHECK_MOIST) && (*sysStatusBuff!=&sysCheckMoistBuff[0])  ) {
 		*sysStatusBuff= (char*)sysCheckMoistBuff;
 	}

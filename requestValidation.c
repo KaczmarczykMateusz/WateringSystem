@@ -64,10 +64,9 @@ value updateSensorValues(uint8_t moisture, uint32_t temp, uint16_t wfVolume, uin
  Notice: resolution: minutes
  	 	 	 	 	ensure to call this function after every change of conditions
  **************************************************************************/
-condSwitch updateConditionalSwitch(uint32_t turnOnTime, uint32_t complexCheckTime, uint8_t moistureMin, uint16_t presetWf, uint32_t procesTime) {
+condSwitch updateConditionalSwitch(uint32_t turnOnTime, uint8_t moistureMin, uint16_t presetWf, uint32_t procesTime) {
 	condSwitch _condSwitch;
 	_condSwitch.turnOnTime = turnOnTime;
-	_condSwitch.complexCheckTime = complexCheckTime;
 	_condSwitch.moistureMin = moistureMin;
 	_condSwitch.presetWf = presetWf;
 	_condSwitch.procesTime = procesTime;
@@ -97,17 +96,16 @@ status conditionalSwitch(condSwitch _condSwitch, value _value, uint32_t currentT
 	case READY:	// purpose: Wait until time reaches set by user turn ON value
 		if(currentTime >= _condSwitch.turnOnTime) {
 			if(!actionExecuted) {
-				newStatus = checkComplexity(_condSwitch);
+				if(_condSwitch.moistCtrl & MOIST_CHECK_ON) {
+					newStatus = CHECK_MOIST;
+				} else {
+					startCallback();
+					newStatus = WORK;
+				}
 				actionExecuted = 1;
 			}
 		} else {
 			actionExecuted = 0;
-		}
-	break;
-
-	case CHECK_TIME_AND_TEMP:	// purpose: Wait until increase of temperature or exceeding 70% of set by user time window
-		if(timeTempSwitch(_condSwitch, currentTime, _value.temp)) {
-			newStatus = CHECK_MOIST;
 		}
 	break;
 
@@ -206,46 +204,3 @@ status terminatingTimer(condSwitch _condSwitch, uint32_t currentTime, status cur
 	return currentStatus;
 }
 
-/*************************************************************************
- Function:	timeTempSwitch()
- Purpose:
- Input:
- Notice:
- **************************************************************************/
-uint8_t timeTempSwitch(condSwitch _condSwitch, uint32_t currentTime, uint32_t currentTemp) {
-	static uint32_t passedTime = 0;
-	static uint32_t savedTemperature = 0;
-	if(currentTime == _condSwitch.turnOnTime) {
-		savedTemperature =	currentTemp;
-	}
-	if(_condSwitch.turnOnTime <= currentTime) {
-		passedTime = currentTime - _condSwitch.turnOnTime;
-	} else {
-		passedTime = (  ((uint32_t)(24*60)*60) - _condSwitch.turnOnTime  ) + currentTime;
-	}
-	if(		(passedTime > ((_condSwitch.complexCheckTime) * 0.7f)) ||	// In case 70% of time passed but temperature didn't increase
-			(currentTemp > (savedTemperature + 100)) ) {				// Or in case if temperature increased by 1 Celsius
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-/*************************************************************************
- Function:	checkComplexity()
- Purpose:
- Input:
- Notice:
- **************************************************************************/
-status checkComplexity(condSwitch _condSwitch) {
-	status currentStatus;
-	if(_condSwitch.complexMode & COMPLEX) {
-		currentStatus = CHECK_TIME_AND_TEMP;
-	} else if(_condSwitch.complexMode & HUMIDITY) {
-		currentStatus = CHECK_MOIST;
-	} else {
-		startCallback();
-		currentStatus = WORK;
-	}
-	return currentStatus;
-}

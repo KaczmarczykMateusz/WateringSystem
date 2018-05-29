@@ -55,11 +55,9 @@ void exitServiceMode(void);
  * 			need for work of the system
  */
 void systemInit(void);
-void printMainScreen(time turnOnClock, uint32_t complexCheckTime, time globalClock, char* sysMoistStat,  char*  currCtrlBuff, char* sysStat);
-void controlMode(void);
+void printMainScreen(time turnOnClock, uint32_t timer, time globalClock, char* sysMoistStat,  char*  currCtrlBuff, char* sysStat);
 
 void toggleCtrl(void);
-void toggleHumidityCtrl(void);
 void activDeactivSystem(void);
 TEMP readTemp(void);
 

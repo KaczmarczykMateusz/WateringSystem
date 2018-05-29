@@ -39,7 +39,7 @@ value updateSensorValues(uint8_t moisture, uint32_t temp, uint16_t wfVolume, uin
  *						  Ensure to call this function after every change of conditions
  *  @see:	conditionalSwitch()
 */
-condSwitch updateConditionalSwitch(uint32_t turnOnTime, uint32_t complexCheckTime, uint8_t moistureMin, uint16_t presetWf, uint32_t procesTime);
+condSwitch updateConditionalSwitch(uint32_t turnOnTime, uint8_t moistureMin, uint16_t presetWf, uint32_t procesTime);
 
 /**
  * @brief:	Prototype of starting action callback function to be replaced with executing function
@@ -87,9 +87,5 @@ status activateSwitch(uint8_t activate, status currentStatus);
 status timeSwitch(condSwitch _condSwitch, uint32_t currentTime, status currentStatus);
 
 status terminatingTimer(condSwitch _condSwitch, uint32_t currentTime, status currentStatus);
-
-uint8_t timeTempSwitch(condSwitch _condSwitch, uint32_t currentTime, uint32_t currentTemp);
-
-status checkComplexity(condSwitch _condSwitch);
 
 #endif

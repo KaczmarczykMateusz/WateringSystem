@@ -15,9 +15,13 @@
 #define MOIST_SENS_ACTIVE	0
 #define MAIN_DEBUG_ACTIVE	1
 #define WF_SENS_DEBUG		1
-#define COMPLEXITY_MODE_DEFAULT	SIMPLE
+#define MOIST_CONTROL_DEFAULT	MOIST_CHECK_OFF
 #define CONTROL_FACTOR_DEFAULT	MINUTES
-
+/*
+#define LIGHT_SENSOR_PIN 0x08
+#define MOIST_SENSOR_1_PIN 0x01
+#define MOIST_SENSOR_2_PIN 0x02
+*/
 int main(void) {
 #if LOGER_ACTIVE
 	uint8_t loggerStatus = LOGGER_NOT_READY;
@@ -45,15 +49,9 @@ int main(void) {
 	moisture[0] = 0;
 	moisture[1] = 0;
 
-	uint8_t minMoist = 0;
 	uint32_t wfDoseVol = 0;
-
-	uint32_t wfVolAccu = 0;
-	uint32_t wfTemp = 0;
-
 	uint8_t resetSecond = 0;
 	uint32_t timerTime = 0;
-
 
 	uint32_t litreTime = 0;
 	actionExecuted = 0;
@@ -73,7 +71,6 @@ int main(void) {
 	moist[0] = initAdcStruct(234, 2100);
 	moist[1] = initAdcStruct(234, 2100);
 
-	moistCtrl = MOIST_OFF;
 
 	systemInit();
 
@@ -88,14 +85,13 @@ int main(void) {
 		}
 
 		uartCheck(parse_uart_data);
-		updateTexts(controlFactor, moistCtrl, systemStatus, &currCtrlBuff, &currMoistCtrlBuff, &currSysStatusBuff);
+		updateTexts(controlFactor, switchConditions.moistureMin, systemStatus, &currCtrlBuff, &currMoistCtrlBuff, &currSysStatusBuff);
 
         if(  (SEC_CHANGED_CHECK) ) {
         	SEC_CHANGED_CLEAR;
 
 	        if(MIN_CHANGED_CHECK) {
 #if MOIST_SENS_ACTIVE
-				// TODO take the lowest or avarage moisture and pass it timerWithMoist (which doesn't exist)
 	        	static uint8_t temporaryLockFlag = 1;
 				moisture[sensorNumber] = moistCheckResult(temporaryLockFlag, moist ,&sensorNumber);
 	        	temporaryLockFlag = moistCheckStart(sensorNumber);
@@ -116,8 +112,8 @@ int main(void) {
 #endif
 	        }
 			temp = readTemp();
-			_sensVal = updateSensorValues(moisture[0], temp.tempMultip, _sensVal.wfVolume, lightStrength);
-			switchConditions = updateConditionalSwitch(timeToSeconds(&turnOnTime), 100, minMoist, wfDoseVol, timerTime);//TODO replace hardcoded _sensVal
+			_sensVal = updateSensorValues((moisture[0]+moisture[1])/2, temp.tempMultip, _sensVal.wfVolume, lightStrength);
+			switchConditions = updateConditionalSwitch(timeToSeconds(&turnOnTime), switchConditions.moistureMin, wfDoseVol, timerTime);
 			systemStatus = conditionalSwitch(switchConditions, _sensVal, timeToSeconds(&global), activateSystem);
 			litreTime = (controlFactor == MINUTES)?timerTime:wfDoseVol/1000;
 			switchConditions.ctrlFactor = controlFactor;
@@ -127,10 +123,11 @@ int main(void) {
         	}
         	global.second = second;
         	timeDivision(&global);
+
+        	 uint32_t wfTemp = measureWF();
 			if(	(!(wfStatus & WF_COUNT_RUNNING)) &&
 					wfTemp) {
-				wfVolAccu += wfTemp / 60;	//Converted to absolute mililitres
-				_sensVal.wfVolume = wfVolAccu;
+				_sensVal.wfVolume += wfTemp / 60;	//Converted to absolute mililitres
 			}
 #if WF_SENS_DEBUG
 			wfSensToggle(1);
@@ -141,13 +138,6 @@ int main(void) {
 			if(!setTimerFlag) {
 				printMainScreen(turnOnTime, litreTime, global, currMoistCtrlBuff, currCtrlBuff, currSysStatusBuff);
 			}
-#if 0	//TODO: probably we won't need it anymore but let's keep it until conditionalSwitch tested
-        	if(controlFactor == MINUTES) {
-        		systemStatus = timerSwitch(timeToMinutes(&global), timeToMinutes(&turnOnTime), litreTime )?WORK:READY;
-        	} else {
-        		systemStatus = READY;//TODDO: implement right function
-        	}
-#endif
 
 	        //outAlarm();
 	        //turnAlarmOff();
@@ -164,7 +154,6 @@ int main(void) {
 			//Waterflow measurnment block TODO: optimize code below and linked t it
 			char uartBuff[16];
 			uartTxStr("\n\rMeasureWF() = ");
-			wfTemp = measureWF();
 			sprintf(uartBuff, "%ld", wfTemp); //TODO, check if this solves issue of too short result
 			uartTxStr(uartBuff);
 			uartTxStr("\n\rwf vol accumulated= ");
@@ -192,18 +181,19 @@ int main(void) {
 			isBlink = 1;
 		}
 		static uint32_t lengthON = 0;
+		uint32_t temporaryVal;
 
 		switch(setTimerFlag) {
 
 		case 1: //Set system clock
-			if(isBlink) {
+				resetSecond = incrDcr(&incrTimeBtn, &dcrTimeBtn, 0, 0, &global);//TODO: check if reset second working
+				keyPress(&stopBtn, exitServiceMode);
+				keyPress(&selectBtn, menuIncr);
+				if(isBlink) {
 				sprintf(firstRowBuffLCD,"%02d:%02d*%3ld%s*%s", turnOnTime.hour, turnOnTime.minute,
 															litreTime, currCtrlBuff, currMoistCtrlBuff);
 				sprintf(secondRowBuffLCD,"  :  *%s", currSysStatusBuff);
 			}
-			resetSecond = incrDcr(&incrTimeBtn, &dcrTimeBtn, 0, 0, &global);//TODO: check if reset second working
-			keyPress(&stopBtn, exitServiceMode);
-			keyPress(&selectBtn, menuIncr);
 		break;
 
 		case 2: //Set turn ON time
@@ -247,9 +237,17 @@ int main(void) {
 		break;
 
 		case 5:
+			//uint32_t tempVara = (uint32_t)switchConditions.moistureMin;
+			temporaryVal = (uint32_t)switchConditions.moistureMin;
+			incrDcr(&incrTimeBtn, &dcrTimeBtn, &temporaryVal, 99, NULL);
 			keyLongPress(&stopBtn, NULL, exitServiceMode);	//TODO: change workStatus performed by function
-			keyPress(&incrTimeBtn, toggleHumidityCtrl);
-			keyPress(&dcrTimeBtn, toggleHumidityCtrl);
+			switchConditions.moistureMin = temporaryVal;
+			if((switchConditions.moistureMin) && (moistCtrl != MOIST_CHECK_ON)) {
+				moistCtrl = MOIST_CHECK_ON;
+			} else if((!switchConditions.moistureMin) && (moistCtrl != MOIST_CHECK_OFF)) {
+				moistCtrl = MOIST_CHECK_OFF;
+			}
+
 			keyPress(&selectBtn, menuIncr);
 			if(isBlink) {
 				sprintf(firstRowBuffLCD,"%02d:%02d*%3ld%s*   ", turnOnTime.hour, turnOnTime.minute, litreTime, currCtrlBuff);
@@ -351,19 +349,6 @@ void toggleCtrl(void) {
 	}
 }
 
-/*************************************************************************
- Function: 	toggleHumidityCtrl()
- Purpose:	Toggle between system  reacting for moisture or not
- **************************************************************************/
-void toggleHumidityCtrl(void) {
-	if(moistCtrl == HUMIDITY) {
-		moistCtrl = SIMPLE;
-	} else {
-		moistCtrl = HUMIDITY;
-	}
-}
-
-
 void activDeactivSystem(void) {
 	if(activateSystem == 0) {
 		activateSystem = 1;
@@ -396,8 +381,7 @@ value initSensVal() {
 
 condSwitch initCondSwitch() {
 	condSwitch tempCondSwitch;
-	tempCondSwitch.complexCheckTime= 0;
-	tempCondSwitch.complexMode= COMPLEXITY_MODE_DEFAULT;
+	tempCondSwitch.moistCtrl= MOIST_CONTROL_DEFAULT;
 	tempCondSwitch.ctrlFactor= CONTROL_FACTOR_DEFAULT;
 	tempCondSwitch.moistureMin = 0;
 	tempCondSwitch.presetWf= 0;
