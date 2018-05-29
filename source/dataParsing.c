@@ -6,7 +6,7 @@
  Description : Parse data received via UART or other way
  ============================================================================
  */
-#include "dataParsing.h"
+#include "../include/dataParsing.h"
 
 #include <stdio.h>
 static const char* sysNotReadyBuff = "CZEKA";

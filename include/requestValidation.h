@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include <avr/io.h>
-#include "lcd.h"
+#include "../drivers/lcd.h"
 #include "common.h"
 
 uint8_t actionExecuted;

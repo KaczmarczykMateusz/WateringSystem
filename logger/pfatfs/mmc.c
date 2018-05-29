@@ -4,7 +4,7 @@
 
 #include "pff.h"
 #include "diskio.h"
-#include "../../spi.h"
+#include "../../drivers/communication/spi.h"
 
 /*-------------------------------------------------------------------------*/
 /* Platform dependent macros and functions needed to be modified           */

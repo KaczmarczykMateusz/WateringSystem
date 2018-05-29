@@ -1,4 +1,5 @@
 //TODO: implement powering of lcd from I/O via transistor
+//TODO: try to change keyLongPress on the way that ther is no need to pass time struct
 /*
  ============================================================================
  Name        : main.c
@@ -7,7 +8,7 @@
  Description :
  ============================================================================
  */
-#include "main.h"
+#include "include/main.h"
 #include <math.h>
 
 #define LOGER_ACTIVE 		0

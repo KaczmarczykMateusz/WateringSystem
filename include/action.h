@@ -11,11 +11,11 @@
 
 #include <stdio.h>
 #include <avr/io.h>
-#include "uart.h"
+#include "../drivers/communication/uart.h"
+#include "../drivers/lcd.h"
 #include "dataParsing.h"
 #include "dataParsing.h"
 #include "clock.h"
-#include "lcd.h"
 #include "common.h"
 
 

@@ -6,12 +6,11 @@
  Description : See header file
  ============================================================================
  */
-#include <avr/sleep.h>
 #include <avr/io.h>
 #include <util/delay.h>
-#include "clock.h"
 #include <avr/interrupt.h>
-#include <util/delay.h>
+#include <avr/sleep.h>
+#include "../include/clock.h"
 
 ISR(TIMER2_OVF_vect)
 /*************************************************************************

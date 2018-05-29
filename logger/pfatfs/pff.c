@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../uart.h"
+#include "../../drivers/communication/uart.h"
 #include "diskio.h"		/* Declarations of low level disk I/O functions */
 
 

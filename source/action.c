@@ -6,7 +6,7 @@
  Description :
  ============================================================================
  */
-#include "action.h"
+#include "../include/action.h"
 
 // Outputs definitions
 #define RELAY_INIT 		DDRC |= (1<<PC0)

@@ -7,8 +7,8 @@
  ============================================================================
  */
 #include <stdio.h>
-#include "requestValidation.h"
-#include "action.h"
+#include "../include/requestValidation.h"
+#include "../include/action.h"
 
 /*************************************************************************
  Function:	registerStartActionCallback()

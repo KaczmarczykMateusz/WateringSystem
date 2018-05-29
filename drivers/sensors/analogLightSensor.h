@@ -10,7 +10,7 @@
 #ifndef ANALOGLIGHTSENSOR_H_
 #define ANALOGLIGHTSENSOR_H_
 
-#include "common.h"
+#include "..\..\include\common.h"
 
 #define LIGHT_SENS_MAX_OUT 400; // Maximum value which may be shown by sensor (drought) multiplied "*100" minus "-1"
 

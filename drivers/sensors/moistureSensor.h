@@ -19,9 +19,9 @@
 #include <util/delay.h>
 #include <math.h>
 
-#include "adc.h"
-#include "dataParsing.h"
-#include "common.h"
+#include "..\adc.h"
+#include "..\..\include\dataParsing.h"
+#include "..\..\include\common.h"
 
 #define MOIST_SENSORS_NUMBER 2
 

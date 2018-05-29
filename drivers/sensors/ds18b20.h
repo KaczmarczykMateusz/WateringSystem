@@ -13,7 +13,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <math.h>
-#include "common.h"
+#include "../../include/common.h"
 
 
 #define THERM_DDR	DDRD

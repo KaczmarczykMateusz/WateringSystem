@@ -26,7 +26,7 @@
  */
 #ifndef LOGGER_H_
 #define LOGGER_H_
-#include "../common.h"
+#include "../include/common.h"
 #include "pfatfs/pff.h"
 #include "pfatfs/diskio.h"
 

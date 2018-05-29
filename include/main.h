@@ -15,22 +15,21 @@
 #include <stdlib.h>
 #include <util/delay.h>
 #include <avr/io.h>
-#include "lcd.h"
-#include "ds18b20.h"
+#include "../drivers/lcd.h"
+#include "../drivers/sensors/ds18b20.h"
+#include "../drivers/sensors/waterflowSensor.h"
+#include "../drivers/sensors/moistureSensor.h"
+#include "../drivers/sensors/analogLightSensor.h"
+#include "../drivers/keyboard.h"
+#include "../drivers/communication/uart.h"
+#include "../drivers/communication/spi.h"
+#include "../drivers/adc.h"
+#include "../logger/logger.h"
 #include "clock.h"
-#include "keyboard.h"
-#include "moistureSensor.h"
 #include "requestValidation.h"
-#include "waterflowSensor.h"
-#include "adc.h"
-#include "analogLightSensor.h"
-#include "uart.h"
 #include "dataParsing.h"
 #include "action.h"
-#include "spi.h"
-#include "fat16.h"
 #include "common.h"
-#include "logger/logger.h"
 
 static const uint16_t BLINK_DELAY_FREQ = 35000;
 

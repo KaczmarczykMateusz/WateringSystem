@@ -14,7 +14,7 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "clock.h"
+#include "../include/clock.h"
 
 //	@brief Buttons masks definitions
 #define BUTTON_DDR DDRD

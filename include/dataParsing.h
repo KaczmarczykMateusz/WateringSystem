@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 #include "common.h"
-#include "uart.h"
+#include "../drivers/communication/uart.h"
 
 typedef struct{
 	uint8_t baseInteger;

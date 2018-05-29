@@ -81,20 +81,19 @@ OBJDIR = .
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC = $(TARGET).c \
-keyboard.c \
+drivers\communication\spi.c \
+drivers\communication\uart.c \
+drivers\sensors\WaterFlowSensor.c \
+drivers\sensors\moistureSensor.c \
+drivers\sensors\analogLightSensor.c \
+drivers\sensors\ds18b20.c \
+drivers\keyboard.c \
+drivers\lcd.c \
+drivers\adc.c \
 clock.c \
-lcd.c \
-ds18b20.c \
-WaterFlowSensor.c \
-moistureSensor.c \
 requestValidation.c \
-adc.c \
-analogLightSensor.c \
-uart.c \
 dataParsing.c \
 action.c \
-fat16.c \
-spi.c \
 pff.c \
 mmc.c \
 loger.c

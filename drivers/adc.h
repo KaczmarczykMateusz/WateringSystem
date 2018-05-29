@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <avr/io.h>
 
-#include "common.h"
+#include "../include/common.h"
 
 /**
  * @brief    Initialise ADC converter with 10 bit (maximum for Atmega32) resolution
