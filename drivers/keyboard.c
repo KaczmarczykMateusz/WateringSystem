@@ -37,9 +37,9 @@ tButton btnInit(volatile uint8_t * K_DDR, volatile uint8_t * K_PORT, volatile ui
  	 	 	8: action not assigned
  **************************************************************************/
 uint8_t keyPress(tButton * btn, void (*action)(void)) {
- 	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
+ 	register uint8_t key_press = !(*btn->K_PIN & btn->key_mask);
 
- 	if(!btn->PressKeyLock && !key_press) {
+ 	if(!btn->PressKeyLock && key_press) {
 		btn->PressKeyLock = 1;
 	//	btn->longPressLock = LONG_PRESS_LOCK_VAL;
 		if(action) {
@@ -48,7 +48,7 @@ uint8_t keyPress(tButton * btn, void (*action)(void)) {
 		} else {
 			return 8;
 		}
-	} else if(btn->PressKeyLock && key_press) {
+	} else if(btn->PressKeyLock && !key_press) {
 		btn->PressKeyLock++;
 	}
  	return 0;
@@ -67,13 +67,13 @@ uint8_t keyPress(tButton * btn, void (*action)(void)) {
  	 	 	 9: long press action not assigned
  **************************************************************************/
 uint8_t keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longPressAction)(void)) {
- 	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);										//TODO: Try to swipe logic = !(*btn->K_PIN & btn->key_mask);
+ 	register uint8_t key_press = !(*btn->K_PIN & btn->key_mask);										//TODO: Try to swipe logic = !(*btn->K_PIN & btn->key_mask);
 
- 	if(!btn->PressKeyLock && !key_press) {
+ 	if(!btn->PressKeyLock && key_press) {
  		btn->longPressExecuted = 0;
 		btn->PressKeyLock = 1;
 		btn->longPressLock = LONG_PRESS_LOCK_VAL;
-	} else if(!btn->longPressLock && !key_press) {
+	} else if(!btn->longPressLock && key_press) {
 		if(!btn->longPressExecuted && longPressAction) {
 			if(longPressAction) {
 				longPressAction(); // action for long PRESS of button
@@ -83,9 +83,9 @@ uint8_t keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longP
 				return 8;
 			}
 		}
-	} else if(btn->PressKeyLock && !key_press) {
-		btn->longPressLock++;
 	} else if(btn->PressKeyLock && key_press) {
+		btn->longPressLock++;
+	} else if(btn->PressKeyLock && !key_press) {
 		if(!btn->longPressExecuted ) {
 			if(shortPressAction) {
 				shortPressAction(); // action for PRESS of button
@@ -106,10 +106,10 @@ uint8_t keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longP
  Input:		tButton struct and pointer to void function performing action
  **************************************************************************/
 void keyPushUp(tButton * btn, void (*action)(void)) {
-	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
+	register uint8_t key_press = !(*btn->K_PIN & btn->key_mask);
 
- 	if(!btn->PushupKeyLock && !key_press) btn->PushupKeyLock = 1;
- 	else if(btn->PushupKeyLock && key_press) {
+ 	if(!btn->PushupKeyLock && key_press) btn->PushupKeyLock = 1;
+ 	else if(btn->PushupKeyLock && !key_press) {
   		if(!++btn->PushupKeyLock) {
   			if(action) {
   				action();   //action for PUSH_UP (button release)
