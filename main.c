@@ -1,5 +1,7 @@
-//TODO: implement powering of lcd from I/O via transistor
-//TODO: try to change keyLongPress on the way that ther is no need to pass time struct
+//TODO: consider removing menuItem() from action.c
+//TODO: try to change keyLongPress that it performs only long press OR short press action
+//TODO: add sleep mode and int to btn waking up display(stopBtn)
+//TODO: try to swipe logic in incrDcr and btnPressed
 /*
  ============================================================================
  Name        : main.c
@@ -18,6 +20,7 @@
 #define WF_SENS_DEBUG		1
 #define MOIST_CONTROL_DEFAULT	MOIST_CHECK_OFF
 #define CONTROL_FACTOR_DEFAULT	MINUTES
+
 /*
 #define LIGHT_SENSOR_PIN 0x08
 #define MOIST_SENSOR_1_PIN 0x01
@@ -61,8 +64,6 @@ int main(void) {
 	uint8_t lightStrength = 0;
 	activateSystem = NOT_READY;
 
-	//TODO: add btn waking up display(stopBtn)
-	// TODO: change buttons masks (probablu to "override" adc)
 	tButton stopBtn = btnInit(&BUTTON_DDR, &BUTTON_PORT, &BUTTON_PIN, STOP_BTN_MASK);
 	tButton selectBtn = btnInit(&BUTTON_DDR, &BUTTON_PORT, &BUTTON_PIN, SELECT_BTN_MASK);
 	tButton incrTimeBtn = btnInit(&BUTTON_DDR, &BUTTON_PORT, &BUTTON_PIN, INCR_BTN_MASK);
@@ -71,7 +72,6 @@ int main(void) {
 	TVOLT moist[3];
 	moist[0] = initAdcStruct(234, 2100);
 	moist[1] = initAdcStruct(234, 2100);
-
 
 	systemInit();
 
@@ -83,6 +83,11 @@ int main(void) {
 // 		@brief: stops alarm or watering ONLY while it's running
 		if(!setTimerFlag) {
 			keyLongPress(&selectBtn, NULL, menuIncr);
+			if(!isLCD_On()) {
+				keyPress(&stopBtn, LCD_PowerUp);
+			} else {
+				keyPress(&stopBtn, LCD_PowerDown);
+			}
 		}
 
 		uartCheck(parse_uart_data);
@@ -152,13 +157,13 @@ int main(void) {
 			uartTxStr("\n\r");
 			uartWriteMoisture(MOIST_SENSORS_NUMBER, moisture);
 
-			//Waterflow measurnment block TODO: optimize code below and linked t it
 			char uartBuff[16];
-			uartTxStr("\n\rMeasureWF() = ");
-			sprintf(uartBuff, "%ld", wfTemp); //TODO, check if this solves issue of too short result
+			uartTxStr("\n\rWf = ");
+			sprintf(uartBuff, "%ld", wfTemp);
 			uartTxStr(uartBuff);
+			uartTxStr(" [ml/min] = ");
 			uartTxStr("\n\rwf vol accumulated= ");
-			sprintf(uartBuff, "%ld", (uint32_t)_sensVal.wfVolume); //TODO, check if this solves issue of too short result
+			sprintf(uartBuff, "%ld", (uint32_t)_sensVal.wfVolume);
 			uartTxStr(uartBuff);
 #if LOGER_ACTIVE
 			if(loggerStatus == LOGGER_SUCCESS) {
@@ -172,13 +177,14 @@ int main(void) {
 
 //	****************** MENU ******************	//
         static uint8_t isBlink = 0;
-		if(( (BLINK_DELAY_FREQ/2) == blinkDelay-- ) || (INPUT_MODIFIED_CHECK)) {
-			INPUT_MODIFIED_CLEAR;
-			printMainScreen(turnOnTime, litreTime, global, currMoistCtrlBuff, currCtrlBuff, currSysStatusBuff);
-		} else if((BLINK_DELAY_FREQ/2) > blinkDelay) {
-
-		} else if(BLINK_DELAY_FREQ < blinkDelay) {
+        static uint8_t inputModified = 0;
+		if(inputModified) {
 			blinkDelay = BLINK_DELAY_FREQ;
+		}
+		if(BLINK_DELAY_FREQ == blinkDelay--) {
+			printMainScreen(turnOnTime, litreTime, global, currMoistCtrlBuff, currCtrlBuff, currSysStatusBuff);
+		} else if(UINT16_MAX == blinkDelay ) {	//It makes one of var to dissapear and appear depend to blink delay set below
+			blinkDelay = BLINK_DELAY_FREQ*1.2;	//TODO consider multiplying by 2 (then makes 50/50 blink)
 			isBlink = 1;
 		}
 		static uint32_t lengthON = 0;
@@ -188,17 +194,18 @@ int main(void) {
 
 		case 1: //Set system clock
 				resetSecond = incrDcr(&incrTimeBtn, &dcrTimeBtn, 0, 0, &global);//TODO: check if reset second working
+				inputModified = resetSecond;
 				keyPress(&stopBtn, exitServiceMode);
 				keyPress(&selectBtn, menuIncr);
 				if(isBlink) {
-				sprintf(firstRowBuffLCD,"%02d:%02d*%3ld%s*%s", turnOnTime.hour, turnOnTime.minute,
-															litreTime, currCtrlBuff, currMoistCtrlBuff);
-				sprintf(secondRowBuffLCD,"  :  *%s", currSysStatusBuff);
-			}
+					sprintf(firstRowBuffLCD,"%02d:%02d*%3ld%s*%s", turnOnTime.hour, turnOnTime.minute,
+																litreTime, currCtrlBuff, currMoistCtrlBuff);
+					sprintf(secondRowBuffLCD,"  :  *%s", currSysStatusBuff);
+				}
 		break;
 
 		case 2: //Set turn ON time
-			incrDcr(&incrTimeBtn, &dcrTimeBtn, 0, 0, &turnOnTime);
+			inputModified = incrDcr(&incrTimeBtn, &dcrTimeBtn, 0, 0, &turnOnTime);
 			keyPress(&stopBtn, exitServiceMode);
 			keyPress(&selectBtn, menuIncr);
 			if(isBlink) {
@@ -208,9 +215,9 @@ int main(void) {
 		break;
 
 		case 3:
-			keyLongPress(&stopBtn, NULL, exitServiceMode);
-			keyPress(&incrTimeBtn, toggleCtrl);
-			keyPress(&dcrTimeBtn, toggleCtrl);
+			keyPress(&stopBtn, exitServiceMode);
+			inputModified = keyPress(&incrTimeBtn, toggleCtrl);
+			inputModified = keyPress(&dcrTimeBtn, toggleCtrl);
 			keyPress(&selectBtn, menuIncr);
 			if(isBlink) {
 				sprintf(firstRowBuffLCD,"%02d:%02d*%3ld   *%s", turnOnTime.hour, turnOnTime.minute,
@@ -220,7 +227,7 @@ int main(void) {
 		break;
 
 		case 4: //Set how long to keep ON ( (by time (minutes)||(by volume (litres) )
-			incrDcr(&incrTimeBtn, &dcrTimeBtn, &lengthON, 999, NULL);
+			inputModified = incrDcr(&incrTimeBtn, &dcrTimeBtn, &lengthON, 999, NULL);
 			keyPress(&stopBtn, exitServiceMode);
 			keyPress(&selectBtn, menuIncr);
 			if(controlFactor == MINUTES) {
@@ -240,7 +247,7 @@ int main(void) {
 		case 5:
 			//uint32_t tempVara = (uint32_t)switchConditions.moistureMin;
 			temporaryVal = (uint32_t)switchConditions.moistureMin;
-			incrDcr(&incrTimeBtn, &dcrTimeBtn, &temporaryVal, 99, NULL);
+			inputModified = incrDcr(&incrTimeBtn, &dcrTimeBtn, &temporaryVal, 99, NULL);
 			keyLongPress(&stopBtn, NULL, exitServiceMode);	//TODO: change workStatus performed by function
 			switchConditions.moistureMin = temporaryVal;
 			if((switchConditions.moistureMin) && (moistCtrl != MOIST_CHECK_ON)) {
@@ -263,8 +270,8 @@ int main(void) {
 		break;
 
 		case 7:
-			keyPress(&incrTimeBtn, activDeactivSystem);
-			keyPress(&dcrTimeBtn, activDeactivSystem);
+			inputModified = keyPress(&incrTimeBtn, activDeactivSystem);
+			inputModified = keyPress(&dcrTimeBtn, activDeactivSystem);
 			keyPress(&selectBtn, menuIncr);
 			if(isBlink) {
 				sprintf(firstRowBuffLCD,"%02d:%02d*%3ld%s*%s", turnOnTime.hour, turnOnTime.minute,
@@ -281,6 +288,7 @@ int main(void) {
 			if(setTimerFlag) {
 				setTimerFlag = 0;
 			}
+			inputModified = 0;
 		}
 
 		if(isBlink) {
@@ -306,7 +314,6 @@ void systemInit(void) {
 	relOFF();
 	outOFF();
 
-	//	lockMainScreen = 0; TODO: remove definition of this variable
 //	powerSaveInit();
 	rt_clock_init();
 	LCD_Initalize();
@@ -331,9 +338,9 @@ void systemInit(void) {
  	 	 	turnOnClock	-
  	 	 	globalClock
  **************************************************************************/
-void printMainScreen(time turnOnClock, uint32_t timer, time globalClock, char* sysMoistStat,  char*  currCtrlBuff, char* sysStat) {
+void printMainScreen(time turnOnClock, uint32_t ctrlVar, time globalClock, char* sysMoistStat,  char*  currCtrlBuff, char* sysStat) {
 	sprintf(firstRowBuffLCD,"%02d:%02d*%3ld%s*%s", turnOnClock.hour, turnOnClock.minute,
-													timer, currCtrlBuff, sysMoistStat); //TODO: pass wf instead of timer in case wf control
+													ctrlVar, currCtrlBuff, sysMoistStat);
 	sprintf(secondRowBuffLCD,"%02d:%02d*%s", globalClock.hour, globalClock.minute, sysStat);
 	printSimpleScreen(firstRowBuffLCD, secondRowBuffLCD);
 }

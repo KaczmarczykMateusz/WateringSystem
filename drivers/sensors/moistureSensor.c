@@ -62,7 +62,7 @@ void moistSensPwrDwn(volatile uint8_t *S_DDR, volatile uint8_t *S_PORT, uint8_t 
  **************************************************************************/
 uint8_t moistCheckStart(uint8_t sensNo) {
 	uint8_t flag;
-	moistSensPwrUp(&DDRA, &PORTA, MOIST_SENSOR_POWER_MASK);
+	moistSensPwrUp(&M_SENS_POWER_DIR, &M_SENS_POWER_PORT, M_SENS_POWER);
 	if(sensNo >= MOIST_SENSORS_NUMBER) {
 		flag = 0;
 	} else {
@@ -93,7 +93,7 @@ uint8_t moistCheckResult(uint8_t isPowered, TVOLT *mSens, uint8_t *sensNo) {
 			sensNo = 0;
 		}
 	}
-	moistSensPwrDwn(&DDRA, &PORTA, MOIST_SENSOR_POWER_MASK);
+	moistSensPwrDwn(&M_SENS_POWER_DIR, &M_SENS_POWER_PORT, M_SENS_POWER);
 
 	return temporaryMoist;
 }

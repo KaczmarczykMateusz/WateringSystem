@@ -168,7 +168,7 @@ void serviceModeEntry(void) {
  **************************************************************************/
 void menuItem(char *row1, char *row2, time *_time) {
 	lockMainScreen = 1;
-
+/*
 	if(	(INPUT_MODIFIED_CHECK) ||
 		(SEC_CHANGED_CHECK)) {
 		printSimpleScreen(row1, row2);
@@ -177,6 +177,7 @@ void menuItem(char *row1, char *row2, time *_time) {
 		_time->second = second;
 		timeDivision(_time);
 	}
+*/
 }
 
 /*************************************************************************

@@ -9,6 +9,30 @@ Description : See header file
 #include "lcd.h"
 
 /*************************************************************************
+ Function: LCD_PowerUp()
+ Purpose:  Pull up transistor supplying current LCD
+ **************************************************************************/
+void LCD_PowerUp(void) {
+	LCD_POWER_PORT |= LCD_POWER;
+}
+
+/*************************************************************************
+ Function:	LCD_PowerDown()
+ Purpose: 	Pull down transistor supplying current LCD
+ **************************************************************************/
+void LCD_PowerDown(void) {
+	LCD_POWER_PORT &= ~LCD_POWER;
+}
+
+/*************************************************************************
+ Function: 	isLCD_On()
+ Purpose:	Return LCD power state
+ **************************************************************************/
+uint8_t isLCD_On(void) {
+	return LCD_POWER_PIN & LCD_POWER;
+}
+
+/*************************************************************************
  Function: 	_LCD_HalfOut()
  Purpose:	Send half byte
  Input:		First send older half of byte
@@ -114,6 +138,8 @@ void LCD_Home(void) {
  Purpose:	Display initialization
  **************************************************************************/
 void LCD_Initalize(void) {
+	LCD_POWER_DIR |= LCD_POWER;	//Initialise display PIN
+	LCD_PowerUp();
 	uint8_t i;
 	LCD_DB4_DIR |= LCD_DB4;	// Configuration of pinout
 	LCD_DB5_DIR |= LCD_DB5;

@@ -35,14 +35,6 @@
  * @brief	Definitions for timeState values
  * 			Indicating time for refreshing MENU
  */
-#define INPUT_MODIFIED_SET		timeState |= (1 << 3)
-#define INPUT_MODIFIED_CHECK	timeState & (1 << 3)
-#define INPUT_MODIFIED_CLEAR	timeState &= ~(1 << 3)
-
-/**
- * @brief	Definitions for timeState values
- * 			Indicating time for refreshing MENU
- */
 #define INPUT_WAIT_MOIST_SET		timeState |= (1 << 4)
 #define INPUT_WAIT_MOIST_CHECK		timeState & (1 << 4)
 #define INPUT_WAIT_MOIST_CLEAR		timeState &= ~(1 << 4)

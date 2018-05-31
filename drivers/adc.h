@@ -16,6 +16,11 @@
 
 #include "../include/common.h"
 
+//@Brief: General all analog input PORT definitions (all ADC inputs belong to the same port in Atmega32 and Atmega8)
+#define ANALOG_INPUT_PORT	PORTA
+#define ANALOG_INPUT_DIR	DDRA
+#define ANALOG_INPUT_PIN	PINA
+
 /**
  * @brief    Initialise ADC converter with 10 bit (maximum for Atmega32) resolution
  */

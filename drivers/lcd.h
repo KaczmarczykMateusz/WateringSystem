@@ -13,7 +13,12 @@ Description : Should work on other AVR too (Atmega8 and 32 tested)
 #include <util/delay.h>
 
 
-// @brief PORT configuration block
+// @brief PORT configuration bloc
+#define LCD_POWER_PORT	PORTA
+#define LCD_POWER_DIR	DDRA
+#define LCD_POWER_PIN	PINA
+#define LCD_POWER		(1 << PA5)
+
 #define LCD_RS_DIR		DDRB
 #define LCD_RS_PORT 	PORTB
 #define LCD_RS			(1 << PB0)
@@ -72,6 +77,18 @@ Description : Should work on other AVR too (Atmega8 and 32 tested)
 #define HD44780_CGRAM_SET			0x40
 
 #define HD44780_DDRAM_SET			0x80
+
+/** @brief  Power up LCD
+ */
+void LCD_PowerUp(void);
+
+/** @brief  Power down LCD
+ */
+void LCD_PowerDown(void);
+
+/** @brief  Return LCD power state
+ */
+uint8_t isLCD_On(void);
 
 /** @brief  Write to HD44780 data half byte by half byte while in 4 bit interface mode
  *  @param  older half of byte to send

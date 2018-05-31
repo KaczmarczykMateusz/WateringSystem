@@ -66,17 +66,19 @@ tButton btnInit(volatile uint8_t * K_DDR, volatile uint8_t * K_PORT, volatile ui
  * @brief	Assigning action to tButton key press event
  * @param	tButton struct and pointer to void function performing action
  * 			triggered at button press event
- * @return	None
+ * @return	Specifies whether key was pressed
  */
-void keyPress(tButton * btn, void (*action)(void));
+uint8_t keyPress(tButton * btn, void (*action)(void));
 
 /**
  * @brief	Assigning action to tButton key press event
  * @param	tButton struct and pointer to void function performing action
  * 			triggered at button press event
- * @return	None
+ * @return	 0: not pressed
+ 	 	 	 1: short pressed
+ 	 	 	 2: long pressed
  */
-void keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longPressAction)(void));
+uint8_t keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longPressAction)(void));
 
 /**
  * @brief	assigning action to tButton key push up event

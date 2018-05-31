@@ -18,8 +18,6 @@
  **************************************************************************/
 tButton btnInit(volatile uint8_t * K_DDR, volatile uint8_t * K_PORT, volatile uint8_t *K_PIN, uint8_t keyMask) {
 	tButton setBtn;
-//	setBtn.K_DDR &= ~keyMask;
-//	setBtn.K_PORT |= keyMask;
 	setBtn.K_DDR = K_DDR;
 	setBtn.K_PORT = K_PORT;
 	setBtn.K_PIN = K_PIN;
@@ -35,8 +33,10 @@ tButton btnInit(volatile uint8_t * K_DDR, volatile uint8_t * K_PORT, volatile ui
  Function: 	key_press()
  Purpose:	assigning action to tButton key press event
  Input:		tButton struct and pointer to void function performing action
+ Output:	Specifies whether key was pressed
+ 	 	 	8: action not assigned
  **************************************************************************/
-void keyPress(tButton * btn, void (*action)(void)) {
+uint8_t keyPress(tButton * btn, void (*action)(void)) {
  	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
 
  	if(!btn->PressKeyLock && !key_press) {
@@ -44,39 +44,60 @@ void keyPress(tButton * btn, void (*action)(void)) {
 	//	btn->longPressLock = LONG_PRESS_LOCK_VAL;
 		if(action) {
 			action(); // action for PRESS of button
+			return 1;
+		} else {
+			return 8;
 		}
-
 	} else if(btn->PressKeyLock && key_press) {
-		(++btn->PressKeyLock);
+		btn->PressKeyLock++;
 	}
+ 	return 0;
  }
+
 
 /*************************************************************************
  Function: 	keyLongPress()
  Purpose:	assigning action to tButton key press event
  Input:		tButton struct, short and long press triggered action
+ Output:	Specifies whether key was pressed
+ 	 	 	 0: not pressed
+ 	 	 	 1: short pressed (released)
+ 	 	 	 2: long pressed
+ 	 	 	 8: short press action not assigned
+ 	 	 	 9: long press action not assigned
  **************************************************************************/
-void keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longPressAction)(void)) {
- 	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);
+uint8_t keyLongPress(tButton * btn, void (*shortPressAction)(void), void (*longPressAction)(void)) {
+ 	register uint8_t key_press = (*btn->K_PIN & btn->key_mask);										//TODO: Try to swipe logic = !(*btn->K_PIN & btn->key_mask);
 
  	if(!btn->PressKeyLock && !key_press) {
  		btn->longPressExecuted = 0;
 		btn->PressKeyLock = 1;
 		btn->longPressLock = LONG_PRESS_LOCK_VAL;
-		if(shortPressAction) {
-			shortPressAction(); // action for PRESS of button
+	} else if(!btn->longPressLock && !key_press) {
+		if(!btn->longPressExecuted && longPressAction) {
+			if(longPressAction) {
+				longPressAction(); // action for long PRESS of button
+				btn->longPressExecuted = 1;										//TODO: change it's name to pressExecuted
+				return 2;
+			} else {
+				return 8;
+			}
 		}
-	}  else if(btn->PressKeyLock && key_press) {
-		(++btn->PressKeyLock);
-	} else if(!key_press && btn->longPressLock) {
+	} else if(btn->PressKeyLock && !key_press) {
 		btn->longPressLock++;
-	} else if(!btn->longPressLock && !key_press && !btn->longPressExecuted) {
-		if(longPressAction) {
-			longPressAction(); // action for PRESS of button
+	} else if(btn->PressKeyLock && key_press) {
+		if(!btn->longPressExecuted ) {
+			if(shortPressAction) {
+				shortPressAction(); // action for PRESS of button
+				btn->longPressExecuted = 1;
+				return 1;
+			} else {
+				return 9;
+			}
 		}
-		btn->longPressExecuted = 1;
+		btn->PressKeyLock++;
 	}
-
+ 	return 0;
  }
 
 /*************************************************************************
@@ -108,7 +129,7 @@ void keyPushUp(tButton * btn, void (*action)(void)) {
 uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint32_t *modVal, uint32_t maxVal, time *modTime) {
 	static uint8_t longPress = 0;
 	static uint8_t shorterDelay = 0;
-	uint8_t opPerformed = 0;
+	uint8_t inputModified = 0;
 
 	register uint8_t addPressed;
 
@@ -118,7 +139,6 @@ uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint32_t *modVal, uint32_t m
 
 	if (!(addPressed && subtrPressed)) {
 		uint8_t temporaryVal = 1;
-		opPerformed = 1;
 		if (longPress > 30) {
 			temporaryVal += 60;
 		} else if (longPress > 15) {
@@ -127,40 +147,56 @@ uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint32_t *modVal, uint32_t m
 			temporaryVal += 3;
 		}
 
-		if(modTime && !addPressed) {
+		if(modTime && !addPressed) {	//@Purpose: Increment time
 			if(temporaryVal >= 60) {
 				modTime->hour ++;
 			} else if(modTime) {
 				modTime->minute += temporaryVal;
 			}
 			timeDivision(modTime);
-		} else if(modTime && !subtrPressed) {
+		} else if(modTime && !subtrPressed) {	//@Purpose: Decrement time
 			if(temporaryVal < 60) {
 				modTime->minute -= temporaryVal;
+			} else {
+				modTime->hour--;
 			}
-			if(modTime) {
-				if(modTime->minute > 59) {
-					modTime->minute = 59;
-					modTime->hour --;
-					if(modTime->hour > 59) {
-						modTime->hour = 23;
-					}
+			if(modTime->minute > 59) {
+				modTime->minute = 59;
+				modTime->hour --;
+				if(modTime->hour > 23) {
+					modTime->hour = 23;
 				}
 			}
-			timeDivision(modTime);
-		} else if(modVal && !addPressed) {
-			*modVal += temporaryVal;
-		} else if(modVal && !subtrPressed) {
-			*modVal -= temporaryVal;
-		}
-		if(modVal) {
-			if(maxVal == 1) {			//In case if we use toggle mode
-				*modVal = 0;
-			} else if(*modVal > maxVal) {
-				*modVal = maxVal;
+//			timeDivision(modTime);
+		} else if(modVal && !addPressed) {	//@Purpose: Increment value
+			if(maxVal==1) {					//@Purpose: In case if we use toggle mode
+				if(*modVal>0) {
+					*modVal = 1;
+				} else {
+					*modVal = 0;
+				}
+			} else {
+				if( (*modVal+temporaryVal) > maxVal ) {
+					*modVal = maxVal;
+				} else {
+					*modVal += temporaryVal;
+				}
+			}
+		} else if(modVal && !subtrPressed) {	//@Purpose: Decrement value
+			if(maxVal==1) {			//In case if we use toggle mode
+				if(*modVal>0) {
+					*modVal = 1;
+				} else {
+					*modVal = 0;
+				}
+			} else {
+				if(*modVal <= temporaryVal) {
+					*modVal = 0;
+				} else {
+					*modVal -= temporaryVal;
+				}
 			}
 		}
-
 
 		if(!shorterDelay) {
 			_delay_ms(120);
@@ -172,15 +208,16 @@ uint8_t incrDcr(tButton *addBtn, tButton *subtrBtn, uint32_t *modVal, uint32_t m
 				longPress++;
 			}
 		}
-		INPUT_MODIFIED_SET;
+		inputModified = 1;
 	} else {
 		longPress = 0;
 		shorterDelay = 0;
 	}
 
-	if(!opPerformed) {
+	if(!inputModified) {
 		return 0;
 	} else {
 		return 1;
 	}
 }
+

@@ -25,7 +25,14 @@
 
 #define MOIST_SENSORS_NUMBER 2
 
-#define MOIST_SENSOR_POWER_MASK	(1 << 0)
+#define M_SENS_POWER_PORT	PORTC
+#define M_SENS_POWER_DIR	DDRC
+#define M_SENS_POWER_PIN	PINC
+#define M_SENS_POWER		(1 << PC5)
+
+#define M_SENS_1		(1 << PA0)
+#define M_SENS_2		(1 << PA1)
+#define M_SENS_3		(1 << PA2)
 
 uint8_t sensorNumber;
 
@@ -64,7 +71,6 @@ uint8_t moistCheckStart(uint8_t sensNo);
  *  @param  flag	: Flag enabling mesurnment which should be set by moistCheckStart()
  *  @param  *mSens	: Structure holding all variables related to ADC results
  *  @param  *sensNo	: Number of sensor being checked, function is allowed to increment this number
-
  *  @return	: Moisture as percent of maximum possible read
  *  @see	: moistCheckStart() which sets flag flag
  *  		  moistureSensor() which actually reads and converts result
